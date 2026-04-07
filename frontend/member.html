@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Member Portal — Committee Showcase</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:      #0a0a0f;
+    --surface: #111118;
+    --card:    #16161f;
+    --border:  rgba(255,255,255,0.07);
+    --accent:  #6c63ff;
+    --accent2: #ff6584;
+    --text:    #f0f0f8;
+    --muted:   #7a7a9a;
+    --error:   #ff6584;
+    --success: #4ade80;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 800px; height: 500px;
+    background: radial-gradient(ellipse, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── nav ── */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    z-index: 10;
+  }
+
+  .nav-logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-back {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+  }
+  .nav-back:hover { color: var(--text); }
+
+  /* ── layout ── */
+  .page {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── auth box ── */
+  .auth-box {
+    width: 100%;
+    max-width: 420px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+  }
+
+  .auth-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 6px;
+  }
+
+  .auth-sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 32px;
+  }
+
+  /* ── submit box (shown after login) ── */
+  .submit-box {
+    width: 100%;
+    max-width: 640px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+  }
+
+  .submit-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(108,99,255,0.1);
+    border: 1px solid rgba(108,99,255,0.2);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--tag-color, #a89cff);
+  }
+
+  .avatar-sm {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: #fff;
+  }
+
+  /* ── form ── */
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  input, textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    border-color: rgba(108,99,255,0.5);
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.1);
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.5; }
+
+  textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    opacity: 0.7;
+  }
+
+  /* ── buttons ── */
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    margin-top: 8px;
+  }
+  .btn-primary:hover:not(:disabled) { background: #7d75ff; transform: translateY(-1px); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+  }
+  .btn-ghost:hover { color: var(--text); }
+
+  /* ── toggle auth mode ── */
+  .toggle-link {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .toggle-link a {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .toggle-link a:hover { text-decoration: underline; }
+
+  /* ── alerts ── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .alert.show { display: block; }
+  .alert-error   { background: rgba(255,101,132,0.1); border: 1px solid rgba(255,101,132,0.2); color: #ff8fa8; }
+  .alert-success { background: rgba(74,222,128,0.1);  border: 1px solid rgba(74,222,128,0.2);  color: #6ee79a; }
+
+  /* ── my projects section ── */
+  .my-projects {
+    margin-top: 32px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .project-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .project-row-title {
+    font-weight: 500;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .status-badge {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 100px;
+    flex-shrink: 0;
+    text-transform: capitalize;
+  }
+  .status-pending  { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+  .status-approved { background: rgba(74,222,128,0.1);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
+  .status-rejected { background: rgba(255,101,132,0.1); color: #ff6584; border: 1px solid rgba(255,101,132,0.2); }
+
+  .feedback-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-style: italic;
+  }
+
+  @media (max-width: 500px) {
+    .auth-box, .submit-box { padding: 28px 22px; }
+    .form-row { grid-template-columns: 1fr; }
+    nav { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-logo">◈ Showcase</a>
+  <a href="index.html" class="nav-back">← Back to projects</a>
+</nav>
+
+<!-- AUTH VIEW (shown when logged out) -->
+<div class="page" id="auth-view">
+  <div class="auth-box">
+    <div class="auth-title" id="auth-title">Welcome back</div>
+    <div class="auth-sub" id="auth-sub">Log in to submit your project</div>
+
+    <div class="alert alert-error" id="auth-error"></div>
+
+    <form id="auth-form">
+      <!-- name field only shown on signup -->
+      <div class="form-group" id="name-group" style="display:none">
+        <label>Full name</label>
+        <input type="text" id="name" placeholder="Your name"/>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" id="auth-btn">Log in</button>
+    </form>
+
+    <div class="toggle-link">
+      <span id="toggle-text">Don't have an account?</span>
+      <a href="#" id="toggle-link"> Sign up</a>
+    </div>
+  </div>
+</div>
+
+<!-- SUBMIT VIEW (shown when logged in) -->
+<div class="page" id="submit-view" style="display:none">
+  <div class="submit-box">
+    <div class="submit-header">
+      <div>
+        <div class="auth-title">Submit a Project</div>
+        <div class="auth-sub">Fill in the details below</div>
+      </div>
+      <div class="user-chip">
+        <div class="avatar-sm" id="user-avatar"></div>
+        <span id="user-name-display"></span>
+      </div>
+    </div>
+
+    <div class="alert alert-error"   id="submit-error"></div>
+    <div class="alert alert-success" id="submit-success"></div>
+
+    <form id="submit-form">
+      <div class="form-group">
+        <label>Project title *</label>
+        <input type="text" id="s-title" placeholder="My Awesome Project" required/>
+      </div>
+
+      <div class="form-group">
+        <label>Creator / team name *</label>
+        <input type="text" id="s-creator" placeholder="Your name or team name" required/>
+      </div>
+
+      <div class="form-group">
+        <label>Description *</label>
+        <textarea id="s-desc" placeholder="What does your project do? What tech did you use?" required></textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>GitHub repo URL</label>
+          <input type="url" id="s-repo" placeholder="https://github.com/..."/>
+        </div>
+        <div class="form-group">
+          <label>Live demo URL</label>
+          <input type="url" id="s-demo" placeholder="https://..."/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Video URL</label>
+        <input type="url" id="s-video" placeholder="https://youtube.com/watch?v=..."/>
+        <div class="form-hint">YouTube links are supported and will be embedded automatically.</div>
+      </div>
+
+      <div class="form-group">
+        <label>Image URLs</label>
+        <input type="url" id="s-img1" placeholder="https://i.imgur.com/..." style="margin-bottom:8px"/>
+        <input type="url" id="s-img2" placeholder="Second image (optional)"/>
+        <div class="form-hint">Upload your images to Imgur or Cloudinary and paste the links here.</div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="submit-btn">Submit project</button>
+      <button type="button" class="btn btn-ghost" onclick="logout()">Log out</button>
+    </form>
+
+    <!-- my submitted projects -->
+    <div class="my-projects" id="my-projects-section">
+      <div class="section-label">Your submissions</div>
+      <div id="my-projects-list"><p style="color:var(--muted);font-size:14px">Loading...</p></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:3000';
+  let isSignup = false;
+
+  // ── token helpers ──────────────────────────────────────────
+  function saveTokens(access, refresh, user) {
+    localStorage.setItem('accessToken',  access);
+    localStorage.setItem('refreshToken', refresh);
+    localStorage.setItem('user',         JSON.stringify(user));
+  }
+
+  function getToken()   { return localStorage.getItem('accessToken'); }
+  function getUser()    { const u = localStorage.getItem('user'); return u ? JSON.parse(u) : null; }
+
+  function clearTokens() {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('user');
+  }
+
+  function initials(name) {
+    return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+  }
+
+  // ── show / hide views ──────────────────────────────────────
+  function showSubmitView(user) {
+    document.getElementById('auth-view').style.display   = 'none';
+    document.getElementById('submit-view').style.display = 'flex';
+    document.getElementById('user-name-display').textContent = user.name;
+    document.getElementById('user-avatar').textContent = initials(user.name);
+    loadMyProjects();
+  }
+
+  function showAuthView() {
+    document.getElementById('auth-view').style.display   = 'flex';
+    document.getElementById('submit-view').style.display = 'none';
+  }
+
+  // ── toggle login / signup ──────────────────────────────────
+  document.getElementById('toggle-link').addEventListener('click', (e) => {
+    e.preventDefault();
+    isSignup = !isSignup;
+    document.getElementById('auth-title').textContent   = isSignup ? 'Create account'         : 'Welcome back';
+    document.getElementById('auth-sub').textContent     = isSignup ? 'Join and submit your projects' : 'Log in to submit your project';
+    document.getElementById('auth-btn').textContent     = isSignup ? 'Sign up'                : 'Log in';
+    document.getElementById('toggle-text').textContent  = isSignup ? 'Already have an account?' : "Don't have an account?";
+    document.getElementById('toggle-link').textContent  = isSignup ? ' Log in'                : ' Sign up';
+    document.getElementById('name-group').style.display = isSignup ? 'block' : 'none';
+    clearAlert('auth-error');
+  });
+
+  // ── auth form submit ───────────────────────────────────────
+  document.getElementById('auth-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('auth-btn');
+    btn.disabled = true;
+    btn.textContent = isSignup ? 'Creating account…' : 'Logging in…';
+    clearAlert('auth-error');
+
+    const body = {
+      email:    document.getElementById('email').value.trim(),
+      password: document.getElementById('password').value,
+    };
+    if (isSignup) body.name = document.getElementById('name').value.trim();
+
+    try {
+      const res  = await fetch(`${API}/auth/${isSignup ? 'signup' : 'login'}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      saveTokens(data.accessToken, data.refreshToken, data.user);
+      showSubmitView(data.user);
+    } catch (err) {
+      showAlert('auth-error', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = isSignup ? 'Sign up' : 'Log in';
+    }
+  });
+
+  // ── submit project ─────────────────────────────────────────
+  document.getElementById('submit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+    clearAlert('submit-error');
+    clearAlert('submit-success');
+
+    const img1 = document.getElementById('s-img1').value.trim();
+    const img2 = document.getElementById('s-img2').value.trim();
+    const image_urls = [img1, img2].filter(Boolean);
+
+    const body = {
+      title:        document.getElementById('s-title').value.trim(),
+      creator_name: document.getElementById('s-creator').value.trim(),
+      description:  document.getElementById('s-desc').value.trim(),
+      repo_url:     document.getElementById('s-repo').value.trim()  || null,
+      demo_url:     document.getElementById('s-demo').value.trim()  || null,
+      video_url:    document.getElementById('s-video').value.trim() || null,
+      image_urls,
+    };
+
+    try {
+      const res  = await fetch(`${API}/projects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      showAlert('submit-success', '✓ Project submitted! It will appear on the showcase after admin approval.');
+      document.getElementById('submit-form').reset();
+      loadMyProjects();
+    } catch (err) {
+      showAlert('submit-error', err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit project';
+    }
+  });
+
+  // ── load my projects ───────────────────────────────────────
+  async function loadMyProjects() {
+    const list = document.getElementById('my-projects-list');
+    try {
+      const res  = await fetch(`${API}/projects/mine`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` },
+      });
+      const data = await res.json();
+      const projects = data.projects || [];
+
+      if (projects.length === 0) {
+        list.innerHTML = `<p style="color:var(--muted);font-size:14px">No submissions yet.</p>`;
+        return;
+      }
+
+      list.innerHTML = projects.map(p => `
+        <div class="project-row">
+          <div>
+            <div class="project-row-title">${p.title}</div>
+            ${p.admin_feedback ? `<div class="feedback-note">Feedback: ${p.admin_feedback}</div>` : ''}
+          </div>
+          <span class="status-badge status-${p.status}">${p.status}</span>
+        </div>
+      `).join('');
+    } catch (err) {
+      list.innerHTML = `<p style="color:var(--muted);font-size:14px">Could not load projects.</p>`;
+    }
+  }
+
+  // ── logout ─────────────────────────────────────────────────
+  async function logout() {
+    const refresh = localStorage.getItem('refreshToken');
+    if (refresh) {
+      await fetch(`${API}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      }).catch(() => {});
+    }
+    clearTokens();
+    showAuthView();
+  }
+
+  // ── alert helpers ──────────────────────────────────────────
+  function showAlert(id, msg)  { const el = document.getElementById(id); el.textContent = msg; el.classList.add('show'); }
+  function clearAlert(id)      { const el = document.getElementById(id); el.textContent = '';  el.classList.remove('show'); }
+
+  // ── on load: check if already logged in ───────────────────
+  const user = getUser();
+  if (user && getToken()) {
+    showSubmitView(user);
+  }
+</script>
+</body>
+</html>
