@@ -10,13 +10,13 @@ const pool = new Pool({
    ssl: { rejectUnauthorized: false }, // required for Supabase
 });
 
-pool.connect((err, client, release) => {
+/*pool.connect((err, client, release) => {
   if (err) {
     console.error('Database connection failed:', err.message);
     process.exit(1); 
   }
   release();
   console.log('Database connected');
-});
+});*/
 
 module.exports = pool;
