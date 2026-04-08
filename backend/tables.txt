@@ -1,0 +1,91 @@
+-- ============================================================
+--  Committee Project Showcase — Database Schema
+--  PostgreSQL 14+
+-- ============================================================
+
+-- ── Extensions ───────────────────────────────────────────────
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"; -- for gen_random_uuid()
+
+
+-- ── Enums ────────────────────────────────────────────────────
+CREATE TYPE user_role       AS ENUM ('member', 'admin');
+CREATE TYPE project_status  AS ENUM ('pending', 'approved', 'rejected');
+
+
+-- ── Users ────────────────────────────────────────────────────
+CREATE TABLE users (
+  id            UUID          PRIMARY KEY DEFAULT gen_random_uuid(),
+  name          VARCHAR(100)  NOT NULL,
+  email         VARCHAR(255)  NOT NULL UNIQUE,
+  password_hash TEXT          NOT NULL,           -- bcrypt hash
+  role          user_role     NOT NULL DEFAULT 'member',
+  created_at    TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+-- fast lookup on login
+CREATE INDEX idx_users_email ON users (email);
+
+
+-- ── Projects ─────────────────────────────────────────────────
+CREATE TABLE projects (
+  id               UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+  submitted_by     UUID           NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+
+  -- core content
+  title            VARCHAR(200)   NOT NULL,
+  description      TEXT           NOT NULL,
+  creator_name     VARCHAR(100)   NOT NULL,        -- display name 
+  repo_url         TEXT,                           -- GitHub / GitLab link
+  demo_url         TEXT,                           -- live demo if any
+
+  -- media  (store public URLs — YouTube, Cloudinary, Imgur, etc.)
+  video_url        TEXT,                           -- YouTube embed or direct .mp4
+  image_urls       TEXT[]         NOT NULL DEFAULT '{}', -- ordered array of image URLs
+
+  -- moderation
+  status           project_status NOT NULL DEFAULT 'pending',
+  admin_feedback   TEXT,                           -- optional rejection note from admin
+
+  -- timestamps
+  submitted_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+  reviewed_at      TIMESTAMPTZ,                    -- set when admin approves / rejects
+  reviewed_by      UUID           REFERENCES users (id) ON DELETE SET NULL
+);
+
+-- public showcase only ever queries approved projects
+CREATE INDEX idx_projects_status      ON projects (status);
+-- admin dashboard lists by submission time
+CREATE INDEX idx_projects_submitted   ON projects (submitted_at DESC);
+-- member "my projects" view
+CREATE INDEX idx_projects_owner       ON projects (submitted_by);
+
+
+-- ── Refresh tokens ─────────────────
+-- Store long-lived refresh tokens so can invalidate sessions.
+CREATE TABLE refresh_tokens (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID        NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  token_hash  TEXT        NOT NULL UNIQUE,         -- hash of the token
+  expires_at  TIMESTAMPTZ NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_refresh_tokens_user ON refresh_tokens (user_id);
+
+-- ============================================================
+--  Quick reference — what each route touches
+-- ============================================================
+--
+--  POST /auth/signup          → INSERT INTO users
+--  POST /auth/login           → SELECT FROM users WHERE email = ?
+--  POST /auth/logout          → DELETE FROM refresh_tokens WHERE token_hash = ?
+--
+--  GET  /projects             → SELECT FROM projects WHERE status = 'approved'
+--  POST /projects             → INSERT INTO projects (submitted_by = req.user.id)
+--  GET  /projects/mine        → SELECT FROM projects WHERE submitted_by = req.user.id
+--
+--  GET  /admin/projects       → SELECT FROM projects (all statuses)
+--  PATCH /admin/projects/:id  → UPDATE projects SET status = ?, reviewed_by = ?, reviewed_at = NOW()
+--  DELETE /admin/projects/:id → DELETE FROM projects WHERE id = ?
+--
+-- ============================================================
