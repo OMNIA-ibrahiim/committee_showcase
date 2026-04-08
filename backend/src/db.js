@@ -3,12 +3,10 @@ const { Pool } = require('pg');
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  max: 1,                // serverless: only 1 connection per function
+  max: 1,
   idleTimeoutMillis: 0,
-  connectionTimeoutMillis: 10000,
+  connectionTimeoutMillis: 5000,
 });
-
-
 
 /*pool.connect((err, client, release) => {
   if (err) {
