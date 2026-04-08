@@ -3,9 +3,9 @@ require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
 
-const authRoutes    = require('./routes/auth');
-const projectRoutes = require('./routes/projects');
-const adminRoutes   = require('./routes/admin');
+const authRoutes    = require('../src/routes/auth');
+const projectRoutes = require('../src/routes/projects');
+const adminRoutes   = require('../src/routes/admin');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -35,6 +35,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'An unexpected error occurred.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+const serverless = require("serverless-http");
+module.exports = serverless(app);
