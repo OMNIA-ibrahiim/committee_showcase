@@ -18,11 +18,13 @@
 
   .page{max-width:900px;margin:0 auto;padding:48px 24px 80px}
 
+  /* ── hero media ── */
   .hero-media{width:100%;border-radius:16px;overflow:hidden;background:#0d0d14;margin-bottom:40px;aspect-ratio:16/9;position:relative}
   .hero-media iframe,.hero-media video{width:100%;height:100%;border:none;display:block}
   .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
   .hero-media-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#111118,#1a1a28)}
 
+  /* ── header section ── */
   .project-header{margin-bottom:32px}
   .project-meta-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
   .creator-pill{display:flex;align-items:center;gap:8px}
@@ -37,11 +39,14 @@
   .link-btn.secondary{color:var(--muted);border-color:var(--border)}
   .link-btn.secondary:hover{color:var(--text);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
 
+  /* ── divider ── */
   .divider{border:none;border-top:1px solid var(--border);margin:32px 0}
 
+  /* ── description ── */
   .section-label{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
   .description{font-size:16px;line-height:1.8;color:rgba(240,240,248,0.85);white-space:pre-wrap}
 
+  /* ── image gallery ── */
   .gallery{display:grid;gap:12px;margin-top:32px}
   .gallery.one{grid-template-columns:1fr}
   .gallery.two{grid-template-columns:1fr 1fr}
@@ -51,15 +56,18 @@
   .gallery-img:hover{transform:scale(1.01)}
   .gallery-img img{width:100%;height:100%;object-fit:cover;display:block}
 
+  /* ── lightbox ── */
   .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
   .lightbox.open{display:flex}
   .lightbox img{max-width:100%;max-height:90vh;border-radius:8px;object-fit:contain}
   .lightbox-close{position:fixed;top:20px;right:24px;font-size:28px;color:rgba(255,255,255,0.6);cursor:pointer;line-height:1;transition:color 0.2s;background:none;border:none}
   .lightbox-close:hover{color:#fff}
 
+  /* ── not found ── */
   .not-found{text-align:center;padding:80px 20px;color:var(--muted)}
   .not-found h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:12px;color:var(--text)}
 
+  /* ── skeleton ── */
   .skeleton{background:linear-gradient(90deg,var(--card) 25%,#1e1e2a 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
   @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   .skeleton-hero{width:100%;aspect-ratio:16/9;border-radius:16px;margin-bottom:40px}
@@ -75,12 +83,14 @@
   <a href="index.html" class="nav-back">← All projects</a>
 </nav>
 
+<!-- lightbox -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt=""/>
 </div>
 
 <div class="page" id="page">
+  <!-- skeleton while loading -->
   <div class="skeleton skeleton-hero"></div>
   <div class="skeleton skeleton-line" style="width:30%;margin-bottom:20px"></div>
   <div class="skeleton skeleton-line" style="width:65%;height:40px;margin-bottom:32px"></div>
@@ -91,8 +101,8 @@
 
 <script>
   const API = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-  ? 'http://localhost:3000'
-  : 'https://committee-showcase.vercel.app';
+    ? 'http://localhost:3000'
+    : 'https://committee-showcase.vercel.app';
 
   function initials(name){return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
   function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})}
@@ -112,6 +122,7 @@
   }
 
   function renderGallery(images,hasVideo){
+    // if there's a video, show all images; if no video, skip first image (used as hero)
     const imgs = hasVideo ? images : images.slice(1);
     if(!imgs||!imgs.length) return '';
     const cls = imgs.length===1?'one':imgs.length===2?'two':'three';
@@ -177,6 +188,7 @@
   }
   document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
 
+  // ── load project by ID from URL ────────────────────────────
   async function load(){
     const params = new URLSearchParams(window.location.search);
     const id     = params.get('id');

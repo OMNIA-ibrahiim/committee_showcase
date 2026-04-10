@@ -27,6 +27,7 @@
     min-height: 100vh;
   }
 
+  /* ── login screen ── */
   .login-wrap {
     min-height: 100vh;
     display: flex;
@@ -59,6 +60,7 @@
     margin-bottom: 28px;
   }
 
+  /* ── dashboard layout ── */
   .dashboard { display: none; min-height: 100vh; }
 
   header {
@@ -103,6 +105,7 @@
     border-radius: 100px;
   }
 
+  /* ── filter tabs ── */
   .filter-bar {
     display: flex;
     gap: 4px;
@@ -128,8 +131,10 @@
     border-color: rgba(108,99,255,0.3);
   }
 
+  /* ── content area ── */
   .content { padding: 24px 36px 60px; max-width: 1000px; }
 
+  /* ── project card (admin style) ── */
   .project-card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -233,6 +238,7 @@
   }
   .link-chip:hover { background: rgba(108,99,255,0.08); }
 
+  /* ── action bar ── */
   .action-bar {
     display: flex;
     align-items: center;
@@ -291,12 +297,14 @@
   }
   .btn-delete:hover { color: #ff6584; border-color: rgba(255,101,132,0.3); }
 
+  /* ── empty / error states ── */
   .empty-state {
     text-align: center;
     padding: 60px 20px;
     color: var(--muted);
   }
 
+  /* ── form elements (login) ── */
   .form-group { margin-bottom: 16px; }
   label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; }
   input {
@@ -412,13 +420,12 @@
 </div>
 
 <script>
-  const API = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-  ? 'http://localhost:3000'
-  : 'https://committee-showcase.vercel.app';
+  const API = 'http://localhost:3000';
   let allProjects = [];
   let currentFilter = 'all';
   let adminToken = null;
 
+  // ── login ──────────────────────────────────────────────────
   document.getElementById('login-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('login-btn');
@@ -459,6 +466,7 @@
     loadProjects();
   }
 
+  // ── load all projects ──────────────────────────────────────
   async function loadProjects() {
     try {
       const res  = await fetch(`${API}/admin/projects`, {
@@ -467,6 +475,7 @@
       const data = await res.json();
       allProjects = data.projects || [];
 
+      // Update pending badge
       const pending = allProjects.filter(p => p.status === 'pending').length;
       const badge   = document.getElementById('pending-count');
       if (pending > 0) {
@@ -483,6 +492,7 @@
     }
   }
 
+  // ── filter ─────────────────────────────────────────────────
   function setFilter(filter, el) {
     currentFilter = filter;
     document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
@@ -490,6 +500,7 @@
     renderProjects();
   }
 
+  // ── render ─────────────────────────────────────────────────
   function renderProjects() {
     const filtered = currentFilter === 'all'
       ? allProjects
@@ -558,6 +569,7 @@
     </div>`;
   }
 
+  // ── approve / reject ───────────────────────────────────────
   async function review(id, status) {
     const feedbackEl = document.getElementById(`fb-${id}`);
     const feedback   = feedbackEl ? feedbackEl.value.trim() : '';
@@ -574,6 +586,7 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
 
+      // Update locally without full reload
       const idx = allProjects.findIndex(p => p.id === id);
       if (idx !== -1) {
         allProjects[idx].status         = status;
@@ -583,6 +596,7 @@
 
       renderProjects();
 
+      // Refresh pending count
       const pending = allProjects.filter(p => p.status === 'pending').length;
       const badge   = document.getElementById('pending-count');
       badge.textContent = `${pending} pending`;
@@ -593,6 +607,7 @@
     }
   }
 
+  // ── delete ─────────────────────────────────────────────────
   async function deleteProject(id) {
     if (!confirm('Permanently delete this project?')) return;
 
@@ -610,6 +625,7 @@
     }
   }
 
+  // ── logout ─────────────────────────────────────────────────
   function logout() {
     localStorage.removeItem('adminToken');
     adminToken = null;
@@ -617,6 +633,7 @@
     document.getElementById('login-screen').style.display = 'flex';
   }
 
+  // ── auto-login if token saved ──────────────────────────────
   const saved = localStorage.getItem('adminToken');
   if (saved) {
     adminToken = saved;
