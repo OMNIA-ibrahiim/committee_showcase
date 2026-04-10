@@ -2,15 +2,19 @@ const router      = require('express').Router();
 const pool        = require('../db');
 const { requireAuth } = require('../middleware/auth');
 
+// ── GET /projects — public, approved only ─────────────────────
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
-         p.submitted_at, u.name AS submitted_by_name
+         p.submitted_at, u.name AS submitted_by_name,
+         COUNT(l.fingerprint)::int AS likes
        FROM projects p
        JOIN users u ON u.id = p.submitted_by
+       LEFT JOIN project_likes l ON l.project_id = p.id
        WHERE p.status = 'approved'
+       GROUP BY p.id, u.name
        ORDER BY p.submitted_at DESC`
     );
     res.json({ projects: result.rows });
@@ -19,6 +23,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ── GET /projects/mine ────────────────────────────────────────
 router.get('/mine', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
@@ -35,15 +40,19 @@ router.get('/mine', requireAuth, async (req, res) => {
   }
 });
 
+// ── GET /projects/:id — single project ───────────────────────
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
-         p.submitted_at, u.name AS submitted_by_name
+         p.submitted_at, u.name AS submitted_by_name,
+         COUNT(l.fingerprint)::int AS likes
        FROM projects p
        JOIN users u ON u.id = p.submitted_by
-       WHERE p.id = $1 AND p.status = 'approved'`,
+       LEFT JOIN project_likes l ON l.project_id = p.id
+       WHERE p.id = $1 AND p.status = 'approved'
+       GROUP BY p.id, u.name`,
       [req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
@@ -53,6 +62,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// ── POST /projects — submit ───────────────────────────────────
 router.post('/', requireAuth, async (req, res) => {
   const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
   if (!title || !description || !creator_name)
@@ -71,6 +81,7 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
+// ── PUT /projects/:id — edit own project ──────────────────────
 router.put('/:id', requireAuth, async (req, res) => {
   const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
   if (!title || !description || !creator_name)
@@ -99,6 +110,48 @@ router.put('/:id', requireAuth, async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Could not update project.' });
+  }
+});
+
+// ── POST /projects/:id/like — toggle like (anonymous) ────────
+// Uses a browser fingerprint stored client-side to identify visitor
+router.post('/:id/like', async (req, res) => {
+  const { fingerprint } = req.body;
+  if (!fingerprint) return res.status(400).json({ error: 'Fingerprint required.' });
+
+  try {
+    // Check if already liked
+    const existing = await pool.query(
+      'SELECT 1 FROM project_likes WHERE project_id = $1 AND fingerprint = $2',
+      [req.params.id, fingerprint]
+    );
+
+    if (existing.rows.length > 0) {
+      // Unlike
+      await pool.query(
+        'DELETE FROM project_likes WHERE project_id = $1 AND fingerprint = $2',
+        [req.params.id, fingerprint]
+      );
+    } else {
+      // Like
+      await pool.query(
+        'INSERT INTO project_likes (project_id, fingerprint) VALUES ($1, $2)',
+        [req.params.id, fingerprint]
+      );
+    }
+
+    // Return new count
+    const count = await pool.query(
+      'SELECT COUNT(*)::int AS likes FROM project_likes WHERE project_id = $1',
+      [req.params.id]
+    );
+
+    res.json({
+      liked: existing.rows.length === 0, // true = just liked, false = just unliked
+      likes: count.rows[0].likes,
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not process like.' });
   }
 });
 
