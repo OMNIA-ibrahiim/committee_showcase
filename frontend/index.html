@@ -195,15 +195,17 @@
 </script>
 </body>
 </html>
+
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Committee Showcase</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 
 <style>
 :root{
@@ -224,49 +226,55 @@ body{
   font-family:'DM Sans',sans-serif;
 }
 
-/* HEADER */
-h2{
+/* SECTION */
+main{
+  padding:40px;
+}
+
+.section-title{
   font-family:'Syne',sans-serif;
-  font-size:20px;
-  padding:30px 30px 10px;
-  letter-spacing:1px;
+  font-size:13px;
+  letter-spacing:0.15em;
   color:var(--muted);
+  margin-bottom:20px;
 }
 
-/* HORIZONTAL SCROLL */
-.cards-row{
+/* 🔥 HORIZONTAL SCROLL (FIX) */
+.grid{
   display:flex;
-  gap:20px;
+  gap:24px;
   overflow-x:auto;
-  padding:20px 30px 40px;
   scroll-snap-type:x mandatory;
+  padding-bottom:10px;
 }
 
-.cards-row::-webkit-scrollbar{
+.grid::-webkit-scrollbar{
   height:6px;
 }
-.cards-row::-webkit-scrollbar-thumb{
+.grid::-webkit-scrollbar-thumb{
   background:rgba(255,255,255,0.1);
   border-radius:10px;
 }
 
-/* CARD */
-.project-card{
-  min-width:320px;
+/* CARD (UNCHANGED DESIGN) */
+.card{
+  min-width:340px;
   max-width:340px;
+  flex-shrink:0;
+  scroll-snap-align:start;
+
   background:var(--card);
   border:1px solid var(--border);
-  border-radius:18px;
+  border-radius:16px;
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  scroll-snap-align:start;
   transition:0.25s;
 }
 
-.project-card:hover{
-  transform:translateY(-6px);
-  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+.card:hover{
+  transform:translateY(-4px);
+  border-color:rgba(108,99,255,0.3);
 }
 
 /* MEDIA */
@@ -276,182 +284,160 @@ h2{
   background:#0d0d14;
 }
 
-.card-media img{
+.card-media img,
+.card-media video,
+.card-media iframe{
   width:100%;
   height:100%;
   object-fit:cover;
 }
 
-/* CONTENT */
-.card-content{
-  padding:16px;
+/* BODY */
+.card-body{
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
 }
 
-.creator{
+.card-meta{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.creator-pill{
   display:flex;
   align-items:center;
-  gap:10px;
-  margin-bottom:10px;
+  gap:8px;
 }
 
 .avatar{
-  width:34px;
-  height:34px;
+  width:28px;
+  height:28px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--accent),var(--accent2));
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.creator-info{
-  font-size:13px;
+  font-size:11px;
+  font-weight:600;
 }
 
 .creator-name{
-  color:var(--text);
-}
-
-.date{
-  color:var(--muted);
-  font-size:11px;
-}
-
-.title{
-  font-family:'Syne',sans-serif;
-  font-size:18px;
-  font-weight:700;
-  margin:10px 0;
-}
-
-.desc{
   font-size:13px;
   color:var(--muted);
-  line-height:1.5;
-  margin-bottom:14px;
 }
 
-/* BUTTONS */
-.actions{
+.card-date{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.card-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:18px;
+}
+
+.card-desc{
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* FOOTER */
+.card-footer{
+  padding:14px 20px;
+  border-top:1px solid var(--border);
   display:flex;
   gap:10px;
 }
 
-.btn{
+.link-btn{
   font-size:12px;
   padding:6px 12px;
-  border-radius:8px;
+  border-radius:6px;
   border:1px solid var(--border);
   text-decoration:none;
   color:var(--muted);
-  transition:0.2s;
 }
 
-.btn.primary{
+.link-btn.primary{
   color:var(--accent);
   border-color:rgba(108,99,255,0.4);
-}
-
-.btn:hover{
-  background:rgba(255,255,255,0.05);
-  color:var(--text);
 }
 </style>
 </head>
 
 <body>
 
-<h2>ALL PROJECTS</h2>
+<main>
+  <div class="section-title">ALL PROJECTS</div>
+  <div class="grid" id="grid"></div>
+</main>
 
-<div class="cards-row">
+<script>
+const API = 'https://committee-showcase.vercel.app';
 
-  <!-- CARD 1 -->
-  <div class="project-card">
-    <div class="card-media">
-      <img src="https://picsum.photos/600/400?1">
-    </div>
+function initials(name){
+  return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
 
-    <div class="card-content">
-      <div class="creator">
-        <div class="avatar">OI</div>
-        <div class="creator-info">
-          <div class="creator-name">omnia ibrahim</div>
-          <div class="date">Apr 2026</div>
+function formatDate(iso){
+  return new Date(iso).toLocaleDateString('en-US',{month:'short',year:'numeric'});
+}
+
+function youtubeEmbed(url){
+  if(!url) return null;
+  const m=url.match(/(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([^&\\s]+)/);
+  return m?`https://www.youtube.com/embed/${m[1]}`:null;
+}
+
+function renderMedia(p){
+  const embed=youtubeEmbed(p.video_url);
+
+  if(embed) return `<div class="card-media"><iframe src="${embed}" allowfullscreen></iframe></div>`;
+  if(p.video_url) return `<div class="card-media"><video src="${p.video_url}" controls></video></div>`;
+  if(p.image_urls?.length) return `<div class="card-media"><img src="${p.image_urls[0]}"/></div>`;
+
+  return `<div class="card-media"></div>`;
+}
+
+function renderCard(p){
+  return `
+  <div class="card">
+    ${renderMedia(p)}
+
+    <div class="card-body">
+      <div class="card-meta">
+        <div class="creator-pill">
+          <div class="avatar">${initials(p.creator_name)}</div>
+          <span class="creator-name">${p.creator_name}</span>
         </div>
+        <span class="card-date">${formatDate(p.submitted_at)}</span>
       </div>
 
-      <div class="title">Committee Showcase</div>
-
-      <div class="desc">
-        A collaborative showcase featuring exceptional projects built by our members.
-      </div>
-
-      <div class="actions">
-        <a href="#" class="btn primary">Repo</a>
-        <a href="#" class="btn">Demo</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- CARD 2 -->
-  <div class="project-card">
-    <div class="card-media">
-      <img src="https://picsum.photos/600/400?2">
+      <div class="card-title">${p.title}</div>
+      <div class="card-desc">${p.description}</div>
     </div>
 
-    <div class="card-content">
-      <div class="creator">
-        <div class="avatar">AI</div>
-        <div class="creator-info">
-          <div class="creator-name">Ahmed Ibrahim</div>
-          <div class="date">Mar 2026</div>
-        </div>
-      </div>
-
-      <div class="title">AI Chatbot</div>
-
-      <div class="desc">
-        Smart chatbot using NLP techniques to answer questions and assist users.
-      </div>
-
-      <div class="actions">
-        <a href="#" class="btn primary">Repo</a>
-        <a href="#" class="btn">Demo</a>
-      </div>
+    <div class="card-footer">
+      ${p.repo_url ? `<a href="${p.repo_url}" target="_blank" class="link-btn primary">Repo</a>` : ''}
+      ${p.demo_url ? `<a href="${p.demo_url}" target="_blank" class="link-btn">Demo</a>` : ''}
     </div>
-  </div>
+  </div>`;
+}
 
-  <!-- CARD 3 -->
-  <div class="project-card">
-    <div class="card-media">
-      <img src="https://picsum.photos/600/400?3">
-    </div>
+async function load(){
+  const res = await fetch(`${API}/projects`);
+  const data = await res.json();
 
-    <div class="card-content">
-      <div class="creator">
-        <div class="avatar">MS</div>
-        <div class="creator-info">
-          <div class="creator-name">Mohamed Samy</div>
-          <div class="date">Feb 2026</div>
-        </div>
-      </div>
+  document.getElementById('grid').innerHTML =
+    data.projects.map(renderCard).join('');
+}
 
-      <div class="title">Task Manager</div>
-
-      <div class="desc">
-        Organize your daily tasks efficiently with deadlines and reminders.
-      </div>
-
-      <div class="actions">
-        <a href="#" class="btn primary">Repo</a>
-        <a href="#" class="btn">Demo</a>
-      </div>
-    </div>
-  </div>
-
-</div>
+load();
+</script>
 
 </body>
 </html>
