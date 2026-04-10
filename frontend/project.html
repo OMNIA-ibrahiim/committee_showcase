@@ -1,209 +1,105 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Project — Committee Showcase</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
-<style>
-  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a}
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
+const router      = require('express').Router();
+const pool        = require('../db');
+const { requireAuth } = require('../middleware/auth');
 
-  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);z-index:100}
-  .nav-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text);text-decoration:none}
-  .nav-back{font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.2s}
-  .nav-back:hover{color:var(--text)}
-
-  .page{max-width:900px;margin:0 auto;padding:48px 24px 80px}
-
-  /* ── hero media ── */
-  .hero-media{width:100%;border-radius:16px;overflow:hidden;background:#0d0d14;margin-bottom:40px;aspect-ratio:16/9;position:relative}
-  .hero-media iframe,.hero-media video{width:100%;height:100%;border:none;display:block}
-  .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
-  .hero-media-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#111118,#1a1a28)}
-
-  /* ── header section ── */
-  .project-header{margin-bottom:32px}
-  .project-meta-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
-  .creator-pill{display:flex;align-items:center;gap:8px}
-  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
-  .creator-info{}
-  .creator-name{font-size:14px;font-weight:500;color:var(--text)}
-  .project-date{font-size:12px;color:var(--muted)}
-  .project-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px}
-  .project-links{display:flex;gap:10px;flex-wrap:wrap}
-  .link-btn{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;padding:8px 18px;border:1px solid rgba(108,99,255,0.3);border-radius:8px;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
-  .link-btn:hover{background:rgba(108,99,255,0.1);border-color:var(--accent)}
-  .link-btn.secondary{color:var(--muted);border-color:var(--border)}
-  .link-btn.secondary:hover{color:var(--text);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
-
-  /* ── divider ── */
-  .divider{border:none;border-top:1px solid var(--border);margin:32px 0}
-
-  /* ── description ── */
-  .section-label{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
-  .description{font-size:16px;line-height:1.8;color:rgba(240,240,248,0.85);white-space:pre-wrap}
-
-  /* ── image gallery ── */
-  .gallery{display:grid;gap:12px;margin-top:32px}
-  .gallery.one{grid-template-columns:1fr}
-  .gallery.two{grid-template-columns:1fr 1fr}
-  .gallery.three{grid-template-columns:1fr 1fr;grid-template-rows:auto auto}
-  .gallery.three .gallery-img:first-child{grid-column:1/-1}
-  .gallery-img{border-radius:12px;overflow:hidden;aspect-ratio:16/9;cursor:pointer;transition:transform 0.3s}
-  .gallery-img:hover{transform:scale(1.01)}
-  .gallery-img img{width:100%;height:100%;object-fit:cover;display:block}
-
-  /* ── lightbox ── */
-  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:1000;display:none;align-items:center;justify-content:center;padding:24px}
-  .lightbox.open{display:flex}
-  .lightbox img{max-width:100%;max-height:90vh;border-radius:8px;object-fit:contain}
-  .lightbox-close{position:fixed;top:20px;right:24px;font-size:28px;color:rgba(255,255,255,0.6);cursor:pointer;line-height:1;transition:color 0.2s;background:none;border:none}
-  .lightbox-close:hover{color:#fff}
-
-  /* ── not found ── */
-  .not-found{text-align:center;padding:80px 20px;color:var(--muted)}
-  .not-found h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:12px;color:var(--text)}
-
-  /* ── skeleton ── */
-  .skeleton{background:linear-gradient(90deg,var(--card) 25%,#1e1e2a 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
-  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-  .skeleton-hero{width:100%;aspect-ratio:16/9;border-radius:16px;margin-bottom:40px}
-  .skeleton-line{height:16px;margin-bottom:12px}
-
-  @media(max-width:600px){nav{padding:16px 20px}.page{padding:32px 16px 60px}.gallery.two,.gallery.three{grid-template-columns:1fr}.gallery.three .gallery-img:first-child{grid-column:auto}}
-</style>
-</head>
-<body>
-
-<nav>
-  <a href="index.html" class="nav-logo">◈ Showcase</a>
-  <a href="index.html" class="nav-back">← All projects</a>
-</nav>
-
-<!-- lightbox -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="" alt=""/>
-</div>
-
-<div class="page" id="page">
-  <!-- skeleton while loading -->
-  <div class="skeleton skeleton-hero"></div>
-  <div class="skeleton skeleton-line" style="width:30%;margin-bottom:20px"></div>
-  <div class="skeleton skeleton-line" style="width:65%;height:40px;margin-bottom:32px"></div>
-  <div class="skeleton skeleton-line" style="width:90%"></div>
-  <div class="skeleton skeleton-line" style="width:80%"></div>
-  <div class="skeleton skeleton-line" style="width:85%"></div>
-</div>
-
-<script>
-  const API = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
-    ? 'http://localhost:3000'
-    : 'https://committee-showcase.vercel.app';
-
-  function initials(name){return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
-  function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})}
-
-  function youtubeEmbed(url){
-    if(!url)return null;
-    const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
-    return m?`https://www.youtube.com/embed/${m[1]}`:null;
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT p.id, p.title, p.description, p.creator_name,
+         p.repo_url, p.demo_url, p.video_url, p.image_urls,
+         p.submitted_at, u.name AS submitted_by_name
+       FROM projects p
+       JOIN users u ON u.id = p.submitted_by
+       WHERE p.status = 'approved'
+       ORDER BY p.submitted_at DESC`
+    );
+    res.json({ projects: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not fetch projects.' });
   }
+});
 
-  function renderMedia(p){
-    const embed=youtubeEmbed(p.video_url);
-    if(embed) return `<div class="hero-media"><iframe src="${embed}" allowfullscreen loading="lazy"></iframe></div>`;
-    if(p.video_url) return `<div class="hero-media"><video src="${p.video_url}" controls preload="metadata"></video></div>`;
-    if(p.image_urls&&p.image_urls.length) return `<div class="hero-media"><img src="${p.image_urls[0]}" alt="${p.title}"/></div>`;
-    return `<div class="hero-media"><div class="hero-media-placeholder"><svg width="48" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>`;
+router.get('/mine', requireAuth, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, title, description, creator_name,
+         repo_url, demo_url, video_url, image_urls,
+         status, admin_feedback, submitted_at, reviewed_at
+       FROM projects WHERE submitted_by = $1
+       ORDER BY submitted_at DESC`,
+      [req.user.id]
+    );
+    res.json({ projects: result.rows });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not fetch your projects.' });
   }
+});
 
-  function renderGallery(images,hasVideo){
-    // if there's a video, show all images; if no video, skip first image (used as hero)
-    const imgs = hasVideo ? images : images.slice(1);
-    if(!imgs||!imgs.length) return '';
-    const cls = imgs.length===1?'one':imgs.length===2?'two':'three';
-    return `<div class="gallery ${cls}">
-      ${imgs.map(url=>`<div class="gallery-img" onclick="openLightbox('${url}')"><img src="${url}" loading="lazy"/></div>`).join('')}
-    </div>`;
+router.get('/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT p.id, p.title, p.description, p.creator_name,
+         p.repo_url, p.demo_url, p.video_url, p.image_urls,
+         p.submitted_at, u.name AS submitted_by_name
+       FROM projects p
+       JOIN users u ON u.id = p.submitted_by
+       WHERE p.id = $1 AND p.status = 'approved'`,
+      [req.params.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Project not found.' });
+    res.json({ project: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not fetch project.' });
   }
+});
 
-  function render(p){
-    const hasVideo = !!(p.video_url);
-    const extraImages = renderGallery(p.image_urls||[], hasVideo);
-
-    document.title = `${p.title} — Committee Showcase`;
-
-    document.getElementById('page').innerHTML = `
-      ${renderMedia(p)}
-
-      <div class="project-header">
-        <div class="project-meta-top">
-          <div class="creator-pill">
-            <div class="avatar">${initials(p.creator_name)}</div>
-            <div class="creator-info">
-              <div class="creator-name">${p.creator_name}</div>
-              <div class="project-date">${formatDate(p.submitted_at)}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="project-title">${p.title}</div>
-
-        <div class="project-links">
-          ${p.repo_url  ? `<a href="${p.repo_url}"  target="_blank" class="link-btn">↗ View repo</a>`  : ''}
-          ${p.demo_url  ? `<a href="${p.demo_url}"  target="_blank" class="link-btn secondary">↗ Live demo</a>` : ''}
-          ${p.video_url && !youtubeEmbed(p.video_url) ? `<a href="${p.video_url}" target="_blank" class="link-btn secondary">↗ Watch video</a>` : ''}
-        </div>
-      </div>
-
-      <hr class="divider"/>
-
-      <div class="section-label">About this project</div>
-      <div class="description">${p.description}</div>
-
-      ${extraImages ? `<hr class="divider"/><div class="section-label">Photos</div>${extraImages}` : ''}
-    `;
+router.post('/', requireAuth, async (req, res) => {
+  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
+  if (!title || !description || !creator_name)
+    return res.status(400).json({ error: 'Title, description, and creator name are required.' });
+  const images = Array.isArray(image_urls) ? image_urls : [];
+  try {
+    const result = await pool.query(
+      `INSERT INTO projects (submitted_by, title, description, creator_name, repo_url, demo_url, video_url, image_urls)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, title, status, submitted_at`,
+      [req.user.id, title.trim(), description.trim(), creator_name.trim(),
+       repo_url||null, demo_url||null, video_url||null, images]
+    );
+    res.status(201).json({ message: 'Project submitted successfully. It will be visible after admin review.', project: result.rows[0] });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not submit project.' });
   }
+});
 
-  function renderNotFound(){
-    document.getElementById('page').innerHTML = `
-      <div class="not-found">
-        <h2>Project not found</h2>
-        <p>This project may have been removed or is not yet approved.</p>
-        <a href="index.html" style="color:var(--accent);text-decoration:none;margin-top:16px;display:inline-block">← Back to showcase</a>
-      </div>`;
+router.put('/:id', requireAuth, async (req, res) => {
+  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
+  if (!title || !description || !creator_name)
+    return res.status(400).json({ error: 'Title, description, and creator name are required.' });
+  const images = Array.isArray(image_urls) ? image_urls : [];
+  try {
+    const check = await pool.query(
+      'SELECT id, status FROM projects WHERE id = $1 AND submitted_by = $2',
+      [req.params.id, req.user.id]
+    );
+    if (check.rows.length === 0) return res.status(404).json({ error: 'Project not found or you do not own it.' });
+    const wasApproved = check.rows[0].status === 'approved';
+    const result = await pool.query(
+      `UPDATE projects SET
+         title=$1, description=$2, creator_name=$3, repo_url=$4,
+         demo_url=$5, video_url=$6, image_urls=$7, status=$8,
+         reviewed_at=NULL, reviewed_by=NULL, admin_feedback=NULL
+       WHERE id=$9 RETURNING id, title, status, submitted_at`,
+      [title.trim(), description.trim(), creator_name.trim(),
+       repo_url||null, demo_url||null, video_url||null, images,
+       wasApproved ? 'pending' : check.rows[0].status, req.params.id]
+    );
+    res.json({
+      message: wasApproved ? 'Project updated and sent back for review.' : 'Project updated successfully.',
+      project: result.rows[0],
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Could not update project.' });
   }
+});
 
-  function openLightbox(url){
-    document.getElementById('lightbox-img').src=url;
-    document.getElementById('lightbox').classList.add('open');
-  }
-  function closeLightbox(){
-    document.getElementById('lightbox').classList.remove('open');
-    document.getElementById('lightbox-img').src='';
-  }
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLightbox()});
-
-  // ── load project by ID from URL ────────────────────────────
-  async function load(){
-    const params = new URLSearchParams(window.location.search);
-    const id     = params.get('id');
-    if(!id){renderNotFound();return;}
-    try{
-      const res  = await fetch(`${API}/projects/${id}`);
-      if(!res.ok){renderNotFound();return;}
-      const data = await res.json();
-      render(data.project);
-    }catch(err){
-      renderNotFound();
-    }
-  }
-
-  load();
-</script>
-</body>
-</html>
+module.exports = router;

@@ -450,6 +450,7 @@
 
       adminToken = data.accessToken;
       localStorage.setItem('adminToken', adminToken);
+      localStorage.setItem('adminRefreshToken', data.refreshToken);
       showDashboard();
     } catch (err) {
       errEl.textContent = err.message;
@@ -628,17 +629,33 @@
   // ── logout ─────────────────────────────────────────────────
   function logout() {
     localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminRefreshToken');
     adminToken = null;
     document.getElementById('dashboard').style.display    = 'none';
     document.getElementById('login-screen').style.display = 'flex';
   }
 
-  // ── auto-login if token saved ──────────────────────────────
-  const saved = localStorage.getItem('adminToken');
-  if (saved) {
-    adminToken = saved;
-    showDashboard();
+  // ── auto-login: refresh token on load ─────────────────────
+  async function init() {
+    const refresh = localStorage.getItem('adminRefreshToken');
+    if (!refresh) return;
+    try {
+      const res  = await fetch(`${API}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: refresh }),
+      });
+      if (!res.ok) throw new Error('expired');
+      const data = await res.json();
+      adminToken = data.accessToken;
+      localStorage.setItem('adminToken', adminToken);
+      showDashboard();
+    } catch(e) {
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminRefreshToken');
+    }
   }
+  init();
 </script>
 </body>
 </html>

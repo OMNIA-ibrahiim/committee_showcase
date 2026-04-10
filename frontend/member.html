@@ -299,8 +299,23 @@
     clearTokens();showAuthView();
   }
 
-  const user=getUser();
-  if(user&&getToken())showSubmitView(user);
+  // Auto-refresh token on load so the session survives past 15 min
+  async function init(){
+    const user=getUser();
+    if(!user){showAuthView();return;}
+    const refresh=localStorage.getItem('refreshToken');
+    if(!refresh){showAuthView();return;}
+    try{
+      const res=await fetch(`${API}/auth/refresh`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:refresh})});
+      if(!res.ok)throw new Error('expired');
+      const data=await res.json();
+      localStorage.setItem('accessToken',data.accessToken);
+      showSubmitView(user);
+    }catch(e){
+      clearTokens();showAuthView();
+    }
+  }
+  init();
 </script>
 </body>
 </html>
