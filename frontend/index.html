@@ -115,7 +115,8 @@
   }
 
  function renderCard(p, index) {
-  const footerLinks =.filter(Boolean).join('');
+  // 1. Wrap each button in a <div> so they are naturally forced onto new lines
+  const footerLinks =.filter(Boolean).join(''); // These will now stack because they are in <div> tags
 
   return `
     <a class="card" href="project.html?id=${p.id}" style="animation-delay:${index * 0.07}s">
@@ -132,16 +133,12 @@
         <div class="card-desc">${p.description}</div>
       </div>
       
-      <!-- Force the footer to wrap items vertically -->
-      <div class="card-footer" style="display: flex; flex-direction: column; align-items: stretch; width: 100%; padding: 15px;">
-        
-        <!-- Button Container -->
-        <div style="width: 100%; display: block;">
-          ${footerLinks}
+      <!-- This container ensures the group of buttons and "View details" are vertical -->
+      <div class="card-footer" style="display: block; padding: 15px; width: 100%;">
+        ${footerLinks}
+        <div style="text-align: right; margin-top: 10px;">
+           <span class="view-more">View details →</span>
         </div>
-
-        <!-- Detail Link -->
-        <span class="view-more" style="display: block; text-align: right; margin-top: 5px;">View details →</span>
       </div>
     </a>`;
 }
