@@ -121,7 +121,7 @@
     ].filter(Boolean).join('');
 
     return `
-    <a class="card" href="project.html?id=${p.id}" style="animation-delay:${index*0.07}s">
+    <article class="card" onclick="location.href='project.html?id=${p.id}'"> style="animation-delay:${index*0.07}s">
       ${renderMedia(p)}
       <div class="card-body">
         <div class="card-meta">
@@ -138,7 +138,7 @@
         ${footerLinks}
         <span class="view-more">View details →</span>
       </div>
-    </a>`;
+    </article>`;
   }
 
   async function loadProjects(){
