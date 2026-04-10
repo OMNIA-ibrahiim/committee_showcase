@@ -115,10 +115,7 @@
   }
 
  function renderCard(p, index) {
-  const footerLinks = [
-    p.repo_url ? `<a href="${p.repo_url}" target="_blank" class="link-btn" onclick="event.stopPropagation()" style="display: block; margin-bottom: 5px; text-align: center;">↗ Repo</a>` : '',
-    p.demo_url ? `<a href="${p.demo_url}" target="_blank" class="link-btn secondary" onclick="event.stopPropagation()" style="display: block; text-align: center;">↗ Demo</a>` : '',
-  ].filter(Boolean).join('');
+  const footerLinks =.filter(Boolean).join('');
 
   return `
     <a class="card" href="project.html?id=${p.id}" style="animation-delay:${index * 0.07}s">
@@ -134,15 +131,21 @@
         <div class="card-title">${p.title}</div>
         <div class="card-desc">${p.description}</div>
       </div>
-      <div class="card-footer" style="display: flex; flex-direction: column; gap: 8px;">
-        <!-- The container below forces the links to stack -->
-        <div style="display: flex; flex-direction: column; width: 100%;">
+      
+      <!-- Force the footer to wrap items vertically -->
+      <div class="card-footer" style="display: flex; flex-direction: column; align-items: stretch; width: 100%; padding: 15px;">
+        
+        <!-- Button Container -->
+        <div style="width: 100%; display: block;">
           ${footerLinks}
         </div>
-        <span class="view-more" style="margin-top: 8px;">View details →</span>
+
+        <!-- Detail Link -->
+        <span class="view-more" style="display: block; text-align: right; margin-top: 5px;">View details →</span>
       </div>
     </a>`;
 }
+
 
   async function loadProjects(){
     try{
