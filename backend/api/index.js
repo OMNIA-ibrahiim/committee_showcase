@@ -71,5 +71,5 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// Vercel expects a default export of the handler function
+
 module.exports = app;
