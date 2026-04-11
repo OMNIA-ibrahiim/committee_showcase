@@ -60,7 +60,7 @@ router.get('/:id', async (req, res) => {
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
          p.submitted_at, u.name AS submitted_by_name,
-         COUNT(l.fingerprint)::int AS likes
+         COUNT(l.user_id)::int AS likes
        FROM projects p
        JOIN users u ON u.id = p.submitted_by
        LEFT JOIN project_likes l ON l.project_id = p.id
