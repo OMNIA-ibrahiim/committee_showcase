@@ -120,17 +120,8 @@
     ? 'http://localhost:3000'
     : 'https://committee-showcase.vercel.app';
 
-  // ── anonymous fingerprint ──────────────────────────────────
-  function getFingerprint() {
-    let fp = localStorage.getItem('fp');
-    if (!fp) { fp = Math.random().toString(36).slice(2)+Date.now().toString(36); localStorage.setItem('fp', fp); }
-    return fp;
-  }
-  const FP = getFingerprint();
-
-  // liked projects stored locally for instant UI
-  function getLiked() { try { return JSON.parse(localStorage.getItem('liked')||'{}'); } catch(e){ return {}; } }
-  function setLiked(obj) { localStorage.setItem('liked', JSON.stringify(obj)); }
+  function getToken() { return localStorage.getItem('accessToken'); }
+  function getUser()  { try { return JSON.parse(localStorage.getItem('user')||'null'); } catch(e){ return null; } }
 
   function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
   function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{month:'short',year:'numeric'})}
@@ -145,7 +136,7 @@
   }
 
   function renderCard(p, index){
-    const liked = getLiked()[p.id] || false;
+    const liked = !!p.user_liked;
     const links = [
       p.repo_url ? `<a href="${p.repo_url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">↗ Repo</a>` : '',
       p.demo_url ? `<a href="${p.demo_url}" target="_blank" class="link-btn secondary" onclick="event.stopPropagation()">↗ Demo</a>` : '',
@@ -178,23 +169,38 @@
 
   async function toggleLike(event, projectId) {
     event.stopPropagation();
-    const liked = getLiked();
+    const token = getToken();
+
+    // Not logged in — redirect to member login
+    if (!token) {
+      if (confirm('You need to log in to like projects. Go to member login?')) {
+        window.location.href = 'member.html';
+      }
+      return;
+    }
+
     const btn = document.getElementById(`like-${projectId}`);
     const countEl = document.getElementById(`like-count-${projectId}`);
 
     try {
       const res = await fetch(`${API}/projects/${projectId}/like`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fingerprint: FP }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
+
+      if (res.status === 401) {
+        if (confirm('Your session expired. Log in again to like projects?')) {
+          window.location.href = 'member.html';
+        }
+        return;
+      }
+
       const data = await res.json();
 
-      // Update local state
-      liked[projectId] = data.liked;
-      setLiked(liked);
-
-      // Update UI
+      // Update UI instantly
       countEl.textContent = data.likes;
       if (data.liked) {
         btn.classList.add('liked');
@@ -210,16 +216,13 @@
 
   async function loadProjects(){
     try{
-      const res=await fetch(`${API}/projects`);
+      const token = getToken();
+      const res=await fetch(`${API}/projects`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      });
       const data=await res.json();
       const projects=data.projects||[];
       const grid=document.getElementById('grid');
-
-      // Sync local liked state with server data
-      const liked = getLiked();
-      projects.forEach(p => {
-        // keep local state as source of truth for UI, server for count
-      });
 
       if(!projects.length){
         grid.innerHTML=`<div class="empty"><p>No projects yet. Be the first to submit one.</p></div>`;

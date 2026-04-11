@@ -4,18 +4,31 @@ const { requireAuth } = require('../middleware/auth');
 
 // ── GET /projects — public, approved only ─────────────────────
 router.get('/', async (req, res) => {
+  // Optionally read user from token if present (for liked state)
+  let userId = null;
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const payload = jwt.verify(header.split(' ')[1], process.env.JWT_SECRET);
+      userId = payload.id;
+    } catch(e) { /* token invalid or missing, that's fine */ }
+  }
+
   try {
     const result = await pool.query(
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
          p.submitted_at, u.name AS submitted_by_name,
-         COUNT(l.fingerprint)::int AS likes
+         COUNT(l.user_id)::int AS likes,
+         BOOL_OR(l.user_id = $1) AS user_liked
        FROM projects p
        JOIN users u ON u.id = p.submitted_by
        LEFT JOIN project_likes l ON l.project_id = p.id
        WHERE p.status = 'approved'
        GROUP BY p.id, u.name
-       ORDER BY p.submitted_at DESC`
+       ORDER BY p.submitted_at DESC`,
+      [userId]
     );
     res.json({ projects: result.rows });
   } catch (err) {
@@ -113,30 +126,26 @@ router.put('/:id', requireAuth, async (req, res) => {
   }
 });
 
-// ── POST /projects/:id/like — toggle like (anonymous) ────────
-// Uses a browser fingerprint stored client-side to identify visitor
-router.post('/:id/like', async (req, res) => {
-  const { fingerprint } = req.body;
-  if (!fingerprint) return res.status(400).json({ error: 'Fingerprint required.' });
-
+// ── POST /projects/:id/like — toggle like (requires login) ──
+router.post('/:id/like', requireAuth, async (req, res) => {
   try {
-    // Check if already liked
+    // Check if already liked by this user
     const existing = await pool.query(
-      'SELECT 1 FROM project_likes WHERE project_id = $1 AND fingerprint = $2',
-      [req.params.id, fingerprint]
+      'SELECT 1 FROM project_likes WHERE project_id = $1 AND user_id = $2',
+      [req.params.id, req.user.id]
     );
 
     if (existing.rows.length > 0) {
       // Unlike
       await pool.query(
-        'DELETE FROM project_likes WHERE project_id = $1 AND fingerprint = $2',
-        [req.params.id, fingerprint]
+        'DELETE FROM project_likes WHERE project_id = $1 AND user_id = $2',
+        [req.params.id, req.user.id]
       );
     } else {
       // Like
       await pool.query(
-        'INSERT INTO project_likes (project_id, fingerprint) VALUES ($1, $2)',
-        [req.params.id, fingerprint]
+        'INSERT INTO project_likes (project_id, user_id) VALUES ($1, $2)',
+        [req.params.id, req.user.id]
       );
     }
 
@@ -147,7 +156,7 @@ router.post('/:id/like', async (req, res) => {
     );
 
     res.json({
-      liked: existing.rows.length === 0, // true = just liked, false = just unliked
+      liked: existing.rows.length === 0,
       likes: count.rows[0].likes,
     });
   } catch (err) {
