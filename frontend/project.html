@@ -154,11 +154,11 @@
         <div class="project-title">${p.title}</div>
 
         <div class="project-links">
-          ${p.repo_url  ? `<a href="${p.repo_url}"  target="_blank" class="link-btn">↗ View repo</a>`  : ''}
-          ${p.demo_url  ? `<a href="${p.demo_url}"  target="_blank" class="link-btn secondary">↗ Live demo</a>` : ''}
+          ${p.repo_url    ? `<a href="${p.repo_url}"    target="_blank" class="link-btn">↗ View repo</a>`           : ''}
+          ${p.demo_url    ? `<a href="${p.demo_url}"    target="_blank" class="link-btn secondary">↗ Live demo</a>` : ''}
           ${p.video_url && !youtubeEmbed(p.video_url) ? `<a href="${p.video_url}" target="_blank" class="link-btn secondary">↗ Watch video</a>` : ''}
+          ${p.postman_url ? `<a href="${p.postman_url}" target="_blank" class="link-btn" style="color:#ff6c37;border-color:rgba(255,108,55,0.3)">↗ Postman</a>` : ''}
         </div>
-      </div>
 
       <hr class="divider"/>
 

@@ -50,6 +50,8 @@
   .link-btn{font-size:12px;font-weight:500;color:var(--accent);text-decoration:none;padding:5px 12px;border:1px solid rgba(108,99,255,0.3);border-radius:6px;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
   .link-btn:hover{background:rgba(108,99,255,0.1);border-color:var(--accent)}
   .link-btn.secondary{color:var(--muted);border-color:var(--border)}
+  .link-btn.postman{color:#ff6c37;border-color:rgba(255,108,55,0.3)}
+  .link-btn.postman:hover{background:rgba(255,108,55,0.08);border-color:#ff6c37}
   .link-btn.secondary:hover{color:var(--text);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
   .like-btn{font-size:12px;font-weight:500;padding:5px 12px;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer;transition:all 0.2s;display:inline-flex;align-items:center;gap:5px;margin-left:auto;white-space:nowrap}
   .like-btn:hover{border-color:rgba(255,101,132,0.4);color:#ff6584}
@@ -138,8 +140,11 @@
   function renderCard(p, index){
     const liked = !!p.user_liked;
     const links = [
-      p.repo_url ? `<a href="${p.repo_url}" target="_blank" class="link-btn" onclick="event.stopPropagation()">↗ Repo</a>` : '',
-      p.demo_url ? `<a href="${p.demo_url}" target="_blank" class="link-btn secondary" onclick="event.stopPropagation()">↗ Demo</a>` : '',
+      p.repo_url     ? `<a href="${p.repo_url}"     target="_blank" class="link-btn"           onclick="event.stopPropagation()">↗ Repo</a>`    : '',
+      p.demo_url     ? `<a href="${p.demo_url}"     target="_blank" class="link-btn secondary"  onclick="event.stopPropagation()">↗ Demo</a>`    : '',
+      p.postman_url  ? `<a href="${p.postman_url}"  target="_blank" class="link-btn postman"    onclick="event.stopPropagation()">
+        <svg width="12" height="12" viewBox="0 0 32 32" fill="currentColor"><path d="M16 0C7.163 0 0 7.163 0 16s7.163 16 16 16 16-7.163 16-16S24.837 0 16 0zm.75 24.5l-7.25-7.25 1.5-1.5 5.75 5.75 9.25-9.25 1.5 1.5-10.75 10.75z"/></svg>
+        Postman</a>` : '',
     ].filter(Boolean).join('');
 
     return `

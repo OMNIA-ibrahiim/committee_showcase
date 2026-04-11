@@ -144,6 +144,11 @@
         <div class="form-hint">YouTube links are embedded automatically.</div>
       </div>
       <div class="form-group">
+        <label>Postman collection URL</label>
+        <input type="url" id="s-postman" placeholder="https://www.postman.com/..."/>
+        <div class="form-hint">In Postman: share collection → publish → copy link. For backend projects without a UI.</div>
+      </div>
+      <div class="form-group">
         <label>Image URLs</label>
         <input type="url" id="s-img1" placeholder="https://i.imgur.com/..." style="margin-bottom:8px"/>
         <input type="url" id="s-img2" placeholder="Second image (optional)"/>
@@ -230,6 +235,7 @@
       repo_url:    document.getElementById('s-repo').value.trim()||null,
       demo_url:    document.getElementById('s-demo').value.trim()||null,
       video_url:   document.getElementById('s-video').value.trim()||null,
+      postman_url: document.getElementById('s-postman').value.trim()||null,
       image_urls:  [img1,img2].filter(Boolean),
     };
     try{
@@ -257,6 +263,7 @@
     document.getElementById('s-repo').value   =p.repo_url||'';
     document.getElementById('s-demo').value   =p.demo_url||'';
     document.getElementById('s-video').value  =p.video_url||'';
+    document.getElementById('s-postman').value =p.postman_url||'';
     document.getElementById('s-img1').value   =p.image_urls?.[0]||'';
     document.getElementById('s-img2').value   =p.image_urls?.[1]||'';
     document.getElementById('submit-form').scrollIntoView({behavior:'smooth'});
@@ -269,6 +276,7 @@
     document.getElementById('submit-btn').textContent='Submit project';
     document.getElementById('cancel-btn').style.display='none';
     document.getElementById('edit-notice').classList.remove('show');
+    document.getElementById('s-postman').value='';
     document.getElementById('submit-form').reset();
   }
 

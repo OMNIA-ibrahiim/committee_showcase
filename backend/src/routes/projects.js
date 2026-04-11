@@ -19,7 +19,7 @@ router.get('/', async (req, res) => {
     const result = await pool.query(
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
-         p.submitted_at, u.name AS submitted_by_name,
+         p.submitted_at, p.postman_url, u.name AS submitted_by_name,
          COUNT(l.user_id)::int AS likes,
          BOOL_OR(l.user_id = $1) AS user_liked
        FROM projects p
@@ -60,7 +60,7 @@ router.get('/:id', async (req, res) => {
       `SELECT p.id, p.title, p.description, p.creator_name,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
          p.submitted_at, u.name AS submitted_by_name,
-         COUNT(l.user_id)::int AS likes
+         COUNT(l.fingerprint)::int AS likes
        FROM projects p
        JOIN users u ON u.id = p.submitted_by
        LEFT JOIN project_likes l ON l.project_id = p.id
@@ -77,16 +77,16 @@ router.get('/:id', async (req, res) => {
 
 // ── POST /projects — submit ───────────────────────────────────
 router.post('/', requireAuth, async (req, res) => {
-  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
+  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls, postman_url } = req.body;
   if (!title || !description || !creator_name)
     return res.status(400).json({ error: 'Title, description, and creator name are required.' });
   const images = Array.isArray(image_urls) ? image_urls : [];
   try {
     const result = await pool.query(
-      `INSERT INTO projects (submitted_by, title, description, creator_name, repo_url, demo_url, video_url, image_urls)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, title, status, submitted_at`,
+      `INSERT INTO projects (submitted_by, title, description, creator_name, repo_url, demo_url, video_url, image_urls, postman_url)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id, title, status, submitted_at`,
       [req.user.id, title.trim(), description.trim(), creator_name.trim(),
-       repo_url||null, demo_url||null, video_url||null, images]
+       repo_url||null, demo_url||null, video_url||null, images, postman_url||null]
     );
     res.status(201).json({ message: 'Project submitted successfully. It will be visible after admin review.', project: result.rows[0] });
   } catch (err) {
@@ -96,7 +96,7 @@ router.post('/', requireAuth, async (req, res) => {
 
 // ── PUT /projects/:id — edit own project ──────────────────────
 router.put('/:id', requireAuth, async (req, res) => {
-  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls } = req.body;
+  const { title, description, creator_name, repo_url, demo_url, video_url, image_urls, postman_url } = req.body;
   if (!title || !description || !creator_name)
     return res.status(400).json({ error: 'Title, description, and creator name are required.' });
   const images = Array.isArray(image_urls) ? image_urls : [];
@@ -111,11 +111,11 @@ router.put('/:id', requireAuth, async (req, res) => {
       `UPDATE projects SET
          title=$1, description=$2, creator_name=$3, repo_url=$4,
          demo_url=$5, video_url=$6, image_urls=$7, status=$8,
-         reviewed_at=NULL, reviewed_by=NULL, admin_feedback=NULL
-       WHERE id=$9 RETURNING id, title, status, submitted_at`,
+         postman_url=$9, reviewed_at=NULL, reviewed_by=NULL, admin_feedback=NULL
+       WHERE id=$10 RETURNING id, title, status, submitted_at`,
       [title.trim(), description.trim(), creator_name.trim(),
        repo_url||null, demo_url||null, video_url||null, images,
-       wasApproved ? 'pending' : check.rows[0].status, req.params.id]
+       wasApproved ? 'pending' : check.rows[0].status, postman_url||null, req.params.id]
     );
     res.json({
       message: wasApproved ? 'Project updated and sent back for review.' : 'Project updated successfully.',
