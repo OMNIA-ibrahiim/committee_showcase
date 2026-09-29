@@ -422,7 +422,7 @@
 <script>
   const API = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
     ? 'http://localhost:3000'
-    : 'https://committee-showcase.vercel.app';
+    : 'https://committeeshowcase-backend.vercel.app/';
 
   // ── security helpers ──
   const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
