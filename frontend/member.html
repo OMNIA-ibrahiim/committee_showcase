@@ -68,7 +68,7 @@
 </nav>
 
 <div class="page" id="auth-view">
-  <div class="auth-box">
+  <div class="auth-box" id="auth-box">
     <div class="auth-title" id="auth-title">Welcome back</div>
     <div class="auth-sub"   id="auth-sub">Log in to submit your project</div>
     <div class="alert alert-error" id="auth-error"></div>
@@ -91,6 +91,22 @@
       <span id="toggle-text">Don't have an account?</span>
       <a href="#" id="toggle-link"> Sign up</a>
     </div>
+  </div>
+
+  <div class="auth-box" id="verify-box" style="display:none">
+    <div class="auth-title">Verify your email</div>
+    <div class="auth-sub" id="verify-sub">Enter the 6-digit code we sent to your email.</div>
+    <div class="alert alert-error" id="verify-error"></div>
+    <div class="alert alert-success" id="verify-info"></div>
+    <form id="verify-form">
+      <div class="form-group">
+        <label>6-digit code</label>
+        <input type="text" id="verify-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" required/>
+      </div>
+      <button type="submit" class="btn btn-primary" id="verify-btn">Verify</button>
+      <button type="button" class="btn btn-ghost" id="resend-btn">Resend code</button>
+    </form>
+    <div class="toggle-link"><a href="#" id="verify-back">&larr; Back</a></div>
   </div>
 </div>
 
@@ -170,6 +186,35 @@
   const API = window.location.hostname === 'localhost' || window.location.protocol === 'file:'
     ? 'http://localhost:3000'
     : 'https://committee-showcase.vercel.app';
+
+  // ── security helpers ──
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeUrl=u=>{try{const x=new URL(u);return(x.protocol==='http:'||x.protocol==='https:')?x.href:''}catch(e){return ''}};
+  function cleanProject(p){
+    const c={...p};
+    ['id','title','description','creator_name','submitted_by_name','submitted_by_email','admin_feedback','reviewed_by_name','status']
+      .forEach(k=>{if(c[k]!=null)c[k]=esc(c[k])});
+    ['repo_url','demo_url','video_url','postman_url'].forEach(k=>{if(c[k])c[k]=esc(safeUrl(c[k]))});
+    c.image_urls=(p.image_urls||[]).map(safeUrl).filter(Boolean).map(esc);
+    c._init=esc(String(p.creator_name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2));
+    c._rawTitle=p.title;
+    return c;
+  }
+
+  async function authFetch(url,opts={}){
+    const go=()=>fetch(url,{...opts,headers:{...(opts.headers||{}),'Authorization':`Bearer ${getToken()}`}});
+    const res=await go();
+    if(res.status!==401)return res;
+    const r=localStorage.getItem('refreshToken');
+    if(!r)return res;
+    try{
+      const rr=await fetch(`${API}/auth/refresh`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refreshToken:r})});
+      if(!rr.ok)return res;
+      localStorage.setItem('accessToken',(await rr.json()).accessToken);
+      return go();
+    }catch(e){return res}
+  }
+
   let isSignup  = false;
   let editingId = null;
 
@@ -214,7 +259,9 @@
     try{
       const res=await fetch(`${API}/auth/${isSignup?'signup':'login'}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       const data=await res.json();
+      if(res.status===403&&data.code==='EMAIL_NOT_VERIFIED'){showVerify(body.email,true);return;}
       if(!res.ok)throw new Error(data.error);
+      if(data.needsVerification){showVerify(body.email,false);return;}
       saveTokens(data.accessToken,data.refreshToken,data.user);
       showSubmitView(data.user);
     }catch(err){showAlert('auth-error',err.message);}
@@ -240,7 +287,7 @@
     };
     try{
       const url=editingId?`${API}/projects/${editingId}`:`${API}/projects`;
-      const res=await fetch(url,{method:editingId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${getToken()}`},body:JSON.stringify(body)});
+      const res=await authFetch(url,{method:editingId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${getToken()}`},body:JSON.stringify(body)});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error);
       showAlert('submit-success',editingId
@@ -249,6 +296,48 @@
       cancelEdit();loadMyProjects();
     }catch(err){showAlert('submit-error',err.message);}
     finally{btn.disabled=false;btn.textContent=editingId?'Save changes':'Submit project';}
+  });
+
+  let pendingEmail='';
+  function showVerify(email,autoResend){
+    pendingEmail=email;
+    document.getElementById('auth-box').style.display='none';
+    document.getElementById('verify-box').style.display='block';
+    document.getElementById('verify-sub').textContent='Enter the 6-digit code sent to '+email+'.';
+    document.getElementById('verify-code').value='';
+    clearAlert('verify-error');clearAlert('verify-info');
+    if(autoResend)resendCode();
+    else showAlert('verify-info','Code sent. Check your inbox and spam folder.');
+  }
+  async function resendCode(){
+    clearAlert('verify-error');clearAlert('verify-info');
+    try{
+      const res=await fetch(`${API}/auth/resend-code`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error);
+      showAlert('verify-info','A code was sent. Check your inbox and spam folder.');
+    }catch(err){showAlert('verify-error',err.message);}
+  }
+  document.getElementById('resend-btn').addEventListener('click',resendCode);
+  document.getElementById('verify-back').addEventListener('click',e=>{
+    e.preventDefault();
+    document.getElementById('verify-box').style.display='none';
+    document.getElementById('auth-box').style.display='block';
+  });
+  document.getElementById('verify-form').addEventListener('submit',async e=>{
+    e.preventDefault();
+    const btn=document.getElementById('verify-btn');btn.disabled=true;
+    clearAlert('verify-error');
+    try{
+      const res=await fetch(`${API}/auth/verify-email`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingEmail,code:document.getElementById('verify-code').value.trim()})});
+      const data=await res.json();
+      if(!res.ok)throw new Error(data.error);
+      saveTokens(data.accessToken,data.refreshToken,data.user);
+      document.getElementById('verify-box').style.display='none';
+      document.getElementById('auth-box').style.display='block';
+      showSubmitView(data.user);
+    }catch(err){showAlert('verify-error',err.message);}
+    finally{btn.disabled=false;}
   });
 
   function startEdit(p){
@@ -283,20 +372,20 @@
   async function loadMyProjects(){
     const list=document.getElementById('my-projects-list');
     try{
-      const res=await fetch(`${API}/projects/mine`,{headers:{'Authorization':`Bearer ${getToken()}`}});
+      const res=await authFetch(`${API}/projects/mine`,{headers:{'Authorization':`Bearer ${getToken()}`}});
       const data=await res.json();
       const projects=data.projects||[];
       if(!projects.length){list.innerHTML='<p style="color:var(--muted);font-size:14px">No submissions yet.</p>';return;}
-      list.innerHTML=projects.map(p=>`
+      window._mine=projects;list.innerHTML=projects.map((p,i)=>`
         <div class="project-row">
           <div class="project-row-top">
-            <div class="project-row-title">${p.title}</div>
+            <div class="project-row-title">${esc(p.title)}</div>
             <div class="project-row-actions">
-              <span class="status-badge status-${p.status}">${p.status}</span>
-              <button class="edit-btn" onclick='startEdit(${JSON.stringify(p)})'>Edit</button>
+              <span class="status-badge status-${esc(p.status)}">${esc(p.status)}</span>
+              <button class="edit-btn" onclick="startEdit(window._mine[${i}])">Edit</button>
             </div>
           </div>
-          ${p.admin_feedback?`<div class="feedback-note">Feedback: ${p.admin_feedback}</div>`:''}
+          ${p.admin_feedback?`<div class="feedback-note">Feedback: ${esc(p.admin_feedback)}</div>`:''}
         </div>`).join('');
     }catch(err){list.innerHTML='<p style="color:var(--muted);font-size:14px">Could not load projects.</p>';}
   }

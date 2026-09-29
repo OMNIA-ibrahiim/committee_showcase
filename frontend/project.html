@@ -104,12 +104,27 @@
     ? 'http://localhost:3000'
     : 'https://committee-showcase.vercel.app';
 
+  // ── security helpers ──
+  const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const safeUrl=u=>{try{const x=new URL(u);return(x.protocol==='http:'||x.protocol==='https:')?x.href:''}catch(e){return ''}};
+  function cleanProject(p){
+    const c={...p};
+    ['id','title','description','creator_name','submitted_by_name','submitted_by_email','admin_feedback','reviewed_by_name','status']
+      .forEach(k=>{if(c[k]!=null)c[k]=esc(c[k])});
+    ['repo_url','demo_url','video_url','postman_url'].forEach(k=>{if(c[k])c[k]=esc(safeUrl(c[k]))});
+    c.image_urls=(p.image_urls||[]).map(safeUrl).filter(Boolean).map(esc);
+    c._init=esc(String(p.creator_name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2));
+    c._rawTitle=p.title;
+    return c;
+  }
+
+
   function initials(name){return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
   function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})}
 
   function youtubeEmbed(url){
     if(!url)return null;
-    const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\s]+)/);
+    const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
     return m?`https://www.youtube.com/embed/${m[1]}`:null;
   }
 
@@ -127,7 +142,7 @@
     if(!imgs||!imgs.length) return '';
     const cls = imgs.length===1?'one':imgs.length===2?'two':'three';
     return `<div class="gallery ${cls}">
-      ${imgs.map(url=>`<div class="gallery-img" onclick="openLightbox('${url}')"><img src="${url}" loading="lazy"/></div>`).join('')}
+      ${imgs.map(url=>`<div class="gallery-img" data-src="${url}" onclick="openLightbox(this.dataset.src)"><img src="${url}" loading="lazy"/></div>`).join('')}
     </div>`;
   }
 
@@ -135,7 +150,7 @@
     const hasVideo = !!(p.video_url);
     const extraImages = renderGallery(p.image_urls||[], hasVideo);
 
-    document.title = `${p.title} — Committee Showcase`;
+    document.title = `${p._rawTitle} — Committee Showcase`;
 
     document.getElementById('page').innerHTML = `
       ${renderMedia(p)}
@@ -143,7 +158,7 @@
       <div class="project-header">
         <div class="project-meta-top">
           <div class="creator-pill">
-            <div class="avatar">${initials(p.creator_name)}</div>
+            <div class="avatar">${p._init}</div>
             <div class="creator-info">
               <div class="creator-name">${p.creator_name}</div>
               <div class="project-date">${formatDate(p.submitted_at)}</div>
@@ -154,10 +169,10 @@
         <div class="project-title">${p.title}</div>
 
         <div class="project-links">
-          ${p.repo_url    ? `<a href="${p.repo_url}"    target="_blank" class="link-btn">↗ View repo</a>`           : ''}
-          ${p.demo_url    ? `<a href="${p.demo_url}"    target="_blank" class="link-btn secondary">↗ Live demo</a>` : ''}
-          ${p.video_url && !youtubeEmbed(p.video_url) ? `<a href="${p.video_url}" target="_blank" class="link-btn secondary">↗ Watch video</a>` : ''}
-          ${p.postman_url ? `<a href="${p.postman_url}" target="_blank" class="link-btn" style="color:#ff6c37;border-color:rgba(255,108,55,0.3)">↗ Postman</a>` : ''}
+          ${p.repo_url    ? `<a href="${p.repo_url}"    target="_blank" rel="noopener noreferrer" class="link-btn">↗ View repo</a>`           : ''}
+          ${p.demo_url    ? `<a href="${p.demo_url}"    target="_blank" rel="noopener noreferrer" class="link-btn secondary">↗ Live demo</a>` : ''}
+          ${p.video_url && !youtubeEmbed(p.video_url) ? `<a href="${p.video_url}" target="_blank" rel="noopener noreferrer" class="link-btn secondary">↗ Watch video</a>` : ''}
+          ${p.postman_url ? `<a href="${p.postman_url}" target="_blank" rel="noopener noreferrer" class="link-btn" style="color:#ff6c37;border-color:rgba(255,108,55,0.3)">↗ Postman</a>` : ''}
         </div>
 
       <hr class="divider"/>
@@ -197,7 +212,7 @@
       const res  = await fetch(`${API}/projects/${id}`);
       if(!res.ok){renderNotFound();return;}
       const data = await res.json();
-      render(data.project);
+      render(cleanProject(data.project));
     }catch(err){
       renderNotFound();
     }
