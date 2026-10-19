@@ -7,11 +7,33 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
-  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a}
+  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a;
+    color-scheme:dark;
+    --nav-bg:rgba(10,10,15,0.95);--hover-bg:rgba(255,255,255,0.04);--hover-border:rgba(255,255,255,0.15);
+    --media-bg:#0d0d14;--ph-grad:linear-gradient(135deg,#111118,#1a1a28);--skel-hi:#1e1e2a;
+    --accent-text:#a89cff;--body-text:rgba(240,240,248,0.85);--bar-bg:rgba(0,0,0,0.2);
+    --icon-stroke:rgba(255,255,255,0.15);--shadow:0 20px 60px rgba(0,0,0,0.4);
+    --pending:#fbbf24;--approved:#4ade80;--rejected:#ff6584;--err-text:#ff8fa8;--ok-text:#6ee79a}
+  [data-theme="light"]{--bg:#f6f6fb;--surface:#f1f1f8;--card:#ffffff;--border:rgba(20,20,45,0.1);--text:#16162a;--muted:#5f5f7d;
+    color-scheme:light;
+    --nav-bg:rgba(246,246,251,0.92);--hover-bg:rgba(20,20,45,0.04);--hover-border:rgba(20,20,45,0.25);
+    --media-bg:#e9e9f2;--ph-grad:linear-gradient(135deg,#ececf5,#dcdcea);--skel-hi:#ececf5;
+    --accent-text:#5648e0;--body-text:rgba(22,22,42,0.85);--bar-bg:rgba(20,20,45,0.03);
+    --icon-stroke:rgba(20,20,45,0.25);--shadow:0 16px 40px rgba(40,40,90,0.15);
+    --pending:#b45309;--approved:#15803d;--rejected:#e11d48;--err-text:#be123c;--ok-text:#15803d}
+  [data-theme="light"] body::before{opacity:.5}
+  .ph-icon{stroke:var(--icon-stroke)}
+  .theme-toggle{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;flex-shrink:0;padding:0}
+  .theme-toggle:hover{color:var(--text);border-color:var(--hover-border);background:var(--hover-bg)}
+  .theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .theme-toggle .i-moon{display:none}
+  [data-theme="light"] .theme-toggle .i-sun{display:none}
+  [data-theme="light"] .theme-toggle .i-moon{display:block}
+  .nav-right{display:flex;align-items:center;gap:16px}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh}
 
-  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,10,15,0.95);backdrop-filter:blur(10px);z-index:100}
+  nav{display:flex;align-items:center;justify-content:space-between;padding:20px 40px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--nav-bg);backdrop-filter:blur(10px);z-index:100}
   .nav-logo{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text);text-decoration:none}
   .nav-back{font-size:13px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:6px;transition:color 0.2s}
   .nav-back:hover{color:var(--text)}
@@ -19,10 +41,10 @@
   .page{max-width:900px;margin:0 auto;padding:48px 24px 80px}
 
   /* ── hero media ── */
-  .hero-media{width:100%;border-radius:16px;overflow:hidden;background:#0d0d14;margin-bottom:40px;aspect-ratio:16/9;position:relative}
+  .hero-media{width:100%;border-radius:16px;overflow:hidden;background:var(--media-bg);margin-bottom:40px;aspect-ratio:16/9;position:relative}
   .hero-media iframe,.hero-media video{width:100%;height:100%;border:none;display:block}
   .hero-media img{width:100%;height:100%;object-fit:cover;display:block}
-  .hero-media-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#111118,#1a1a28)}
+  .hero-media-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--ph-grad)}
 
   /* ── header section ── */
   .project-header{margin-bottom:32px}
@@ -37,14 +59,14 @@
   .link-btn{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;padding:8px 18px;border:1px solid rgba(108,99,255,0.3);border-radius:8px;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
   .link-btn:hover{background:rgba(108,99,255,0.1);border-color:var(--accent)}
   .link-btn.secondary{color:var(--muted);border-color:var(--border)}
-  .link-btn.secondary:hover{color:var(--text);border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.04)}
+  .link-btn.secondary:hover{color:var(--text);border-color:var(--hover-border);background:var(--hover-bg)}
 
   /* ── divider ── */
   .divider{border:none;border-top:1px solid var(--border);margin:32px 0}
 
   /* ── description ── */
   .section-label{font-size:11px;font-weight:500;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
-  .description{font-size:16px;line-height:1.8;color:rgba(240,240,248,0.85);white-space:pre-wrap}
+  .description{font-size:16px;line-height:1.8;color:var(--body-text);white-space:pre-wrap}
 
   /* ── image gallery ── */
   .gallery{display:grid;gap:12px;margin-top:32px}
@@ -68,7 +90,7 @@
   .not-found h2{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:700;margin-bottom:12px;color:var(--text)}
 
   /* ── skeleton ── */
-  .skeleton{background:linear-gradient(90deg,var(--card) 25%,#1e1e2a 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+  .skeleton{background:linear-gradient(90deg,var(--card) 25%,var(--skel-hi) 50%,var(--card) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
   @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   .skeleton-hero{width:100%;aspect-ratio:16/9;border-radius:16px;margin-bottom:40px}
   .skeleton-line{height:16px;margin-bottom:12px}
@@ -80,7 +102,13 @@
 
 <nav>
   <a href="index.html" class="nav-logo">◈ Showcase</a>
-  <a href="index.html" class="nav-back">← All projects</a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back">← All projects</a>
+    <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between dark and light mode" title="Switch theme">
+    <svg class="i-sun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg class="i-moon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  </div>
 </nav>
 
 <!-- lightbox -->
@@ -133,7 +161,7 @@
     if(embed) return `<div class="hero-media"><iframe src="${embed}" allowfullscreen loading="lazy"></iframe></div>`;
     if(p.video_url) return `<div class="hero-media"><video src="${p.video_url}" controls preload="metadata"></video></div>`;
     if(p.image_urls&&p.image_urls.length) return `<div class="hero-media"><img src="${p.image_urls[0]}" alt="${p.title}"/></div>`;
-    return `<div class="hero-media"><div class="hero-media-placeholder"><svg width="48" height="48" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>`;
+    return `<div class="hero-media"><div class="hero-media-placeholder"><svg class="ph-icon" width="48" height="48" fill="none" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>`;
   }
 
   function renderGallery(images,hasVideo){
@@ -219,6 +247,13 @@
   }
 
   load();
+
+  // ── light / dark toggle (dark by default, choice is not remembered) ──
+  function toggleTheme(){
+    const r=document.documentElement;
+    if(r.getAttribute('data-theme')==='light')r.removeAttribute('data-theme');
+    else r.setAttribute('data-theme','light');
+  }
 </script>
 </body>
 </html>

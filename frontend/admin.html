@@ -7,15 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg:      #0a0a0f;
-    --surface: #111118;
-    --card:    #16161f;
-    --border:  rgba(255,255,255,0.07);
-    --accent:  #6c63ff;
-    --text:    #f0f0f8;
-    --muted:   #7a7a9a;
-  }
+  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a;
+    color-scheme:dark;
+    --nav-bg:rgba(10,10,15,0.95);--hover-bg:rgba(255,255,255,0.04);--hover-border:rgba(255,255,255,0.15);
+    --media-bg:#0d0d14;--ph-grad:linear-gradient(135deg,#111118,#1a1a28);--skel-hi:#1e1e2a;
+    --accent-text:#a89cff;--body-text:rgba(240,240,248,0.85);--bar-bg:rgba(0,0,0,0.2);
+    --icon-stroke:rgba(255,255,255,0.15);--shadow:0 20px 60px rgba(0,0,0,0.4);
+    --pending:#fbbf24;--approved:#4ade80;--rejected:#ff6584;--err-text:#ff8fa8;--ok-text:#6ee79a}
+  [data-theme="light"]{--bg:#f6f6fb;--surface:#f1f1f8;--card:#ffffff;--border:rgba(20,20,45,0.1);--text:#16162a;--muted:#5f5f7d;
+    color-scheme:light;
+    --nav-bg:rgba(246,246,251,0.92);--hover-bg:rgba(20,20,45,0.04);--hover-border:rgba(20,20,45,0.25);
+    --media-bg:#e9e9f2;--ph-grad:linear-gradient(135deg,#ececf5,#dcdcea);--skel-hi:#ececf5;
+    --accent-text:#5648e0;--body-text:rgba(22,22,42,0.85);--bar-bg:rgba(20,20,45,0.03);
+    --icon-stroke:rgba(20,20,45,0.25);--shadow:0 16px 40px rgba(40,40,90,0.15);
+    --pending:#b45309;--approved:#15803d;--rejected:#e11d48;--err-text:#be123c;--ok-text:#15803d}
+  [data-theme="light"] body::before{opacity:.5}
+  .ph-icon{stroke:var(--icon-stroke)}
+  .theme-toggle{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;flex-shrink:0;padding:0}
+  .theme-toggle:hover{color:var(--text);border-color:var(--hover-border);background:var(--hover-bg)}
+  .theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .theme-toggle .i-moon{display:none}
+  [data-theme="light"] .theme-toggle .i-sun{display:none}
+  [data-theme="light"] .theme-toggle .i-moon{display:block}
+  .nav-right{display:flex;align-items:center;gap:16px}
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -71,7 +85,7 @@
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    background: rgba(10,10,15,0.95);
+    background: var(--nav-bg);
     backdrop-filter: blur(10px);
     z-index: 100;
   }
@@ -87,7 +101,7 @@
   .admin-badge {
     font-size: 11px;
     background: rgba(108,99,255,0.15);
-    color: #a89cff;
+    color: var(--accent-text);
     border: 1px solid rgba(108,99,255,0.2);
     padding: 3px 10px;
     border-radius: 100px;
@@ -98,7 +112,7 @@
 
   .pending-count {
     font-size: 13px;
-    color: #fbbf24;
+    color: var(--pending);
     background: rgba(251,191,36,0.1);
     border: 1px solid rgba(251,191,36,0.2);
     padding: 4px 12px;
@@ -124,7 +138,7 @@
     cursor: pointer;
     transition: all 0.2s;
   }
-  .filter-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.15); }
+  .filter-tab:hover { color: var(--text); border-color: var(--hover-border); }
   .filter-tab.active {
     background: var(--card);
     color: var(--text);
@@ -143,7 +157,7 @@
     overflow: hidden;
     transition: border-color 0.2s;
   }
-  .project-card:hover { border-color: rgba(255,255,255,0.12); }
+  .project-card:hover { border-color: var(--hover-border); }
 
   .project-card-inner {
     display: grid;
@@ -156,13 +170,13 @@
     aspect-ratio: 16/9;
     object-fit: cover;
     display: block;
-    background: #0d0d14;
+    background: var(--media-bg);
   }
 
   .project-thumb-placeholder {
     width: 200px;
     aspect-ratio: 16/9;
-    background: linear-gradient(135deg, #111118, #1a1a28);
+    background: var(--ph-grad);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -198,9 +212,9 @@
     flex-shrink: 0;
     text-transform: capitalize;
   }
-  .status-pending  { background: rgba(251,191,36,0.1);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
-  .status-approved { background: rgba(74,222,128,0.1);  color: #4ade80; border: 1px solid rgba(74,222,128,0.2); }
-  .status-rejected { background: rgba(255,101,132,0.1); color: #ff6584; border: 1px solid rgba(255,101,132,0.2); }
+  .status-pending  { background: rgba(251,191,36,0.1);  color: var(--pending); border: 1px solid rgba(251,191,36,0.2); }
+  .status-approved { background: rgba(74,222,128,0.1);  color: var(--approved); border: 1px solid rgba(74,222,128,0.2); }
+  .status-rejected { background: rgba(255,101,132,0.1); color: var(--rejected); border: 1px solid rgba(255,101,132,0.2); }
 
   .project-meta {
     font-size: 13px;
@@ -245,7 +259,7 @@
     gap: 10px;
     padding: 14px 24px;
     border-top: 1px solid var(--border);
-    background: rgba(0,0,0,0.2);
+    background: var(--bar-bg);
     flex-wrap: wrap;
   }
 
@@ -278,14 +292,14 @@
 
   .btn-approve {
     background: rgba(74,222,128,0.15);
-    color: #4ade80;
+    color: var(--approved);
     border: 1px solid rgba(74,222,128,0.2);
   }
   .btn-approve:hover { background: rgba(74,222,128,0.25); }
 
   .btn-reject {
     background: rgba(255,101,132,0.1);
-    color: #ff6584;
+    color: var(--rejected);
     border: 1px solid rgba(255,101,132,0.2);
   }
   .btn-reject:hover { background: rgba(255,101,132,0.2); }
@@ -295,7 +309,7 @@
     color: var(--muted);
     border: 1px solid var(--border);
   }
-  .btn-delete:hover { color: #ff6584; border-color: rgba(255,101,132,0.3); }
+  .btn-delete:hover { color: var(--rejected); border-color: rgba(255,101,132,0.3); }
 
   /* ── empty / error states ── */
   .empty-state {
@@ -354,7 +368,7 @@
   .alert-error {
     background: rgba(255,101,132,0.1);
     border: 1px solid rgba(255,101,132,0.2);
-    color: #ff8fa8;
+    color: var(--err-text);
     padding: 10px 14px;
     border-radius: 8px;
     font-size: 14px;
@@ -362,6 +376,8 @@
     display: none;
   }
   .alert-error.show { display: block; }
+
+  .theme-corner{position:fixed;top:20px;right:20px;z-index:5}
 
   @media (max-width: 600px) {
     .project-card-inner { grid-template-columns: 1fr; }
@@ -375,6 +391,10 @@
 
 <!-- LOGIN SCREEN -->
 <div class="login-wrap" id="login-screen">
+  <button type="button" class="theme-toggle theme-corner" onclick="toggleTheme()" aria-label="Switch between dark and light mode" title="Switch theme">
+    <svg class="i-sun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg class="i-moon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
   <div class="login-box">
     <div class="login-label">Admin access</div>
     <div class="login-title">Committee Dashboard</div>
@@ -402,6 +422,10 @@
     </div>
     <div class="header-right">
       <span class="pending-count" id="pending-count" style="display:none"></span>
+      <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between dark and light mode" title="Switch theme">
+    <svg class="i-sun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg class="i-moon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
       <a href="index.html" class="btn-sm">View public page</a>
       <button class="btn-sm" onclick="logout()">Log out</button>
     </div>
@@ -551,7 +575,7 @@
   function renderCard(p) {
     const thumb = p.image_urls && p.image_urls[0]
       ? `<img class="project-thumb" src="${p.image_urls[0]}" alt="" loading="lazy"/>`
-      : `<div class="project-thumb-placeholder"><svg width="32" height="32" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
+      : `<div class="project-thumb-placeholder"><svg class="ph-icon" width="32" height="32" fill="none" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div>`;
 
     const links = [
       p.repo_url  ? `<a href="${p.repo_url}"  target="_blank" rel="noopener noreferrer" class="link-chip">↗ Repo</a>`  : '',
@@ -687,6 +711,13 @@
     }
   }
   init();
+
+  // ── light / dark toggle (dark by default, choice is not remembered) ──
+  function toggleTheme(){
+    const r=document.documentElement;
+    if(r.getAttribute('data-theme')==='light')r.removeAttribute('data-theme');
+    else r.setAttribute('data-theme','light');
+  }
 </script>
 </body>
 </html>

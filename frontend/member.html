@@ -7,7 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
-  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a}
+  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a;
+    color-scheme:dark;
+    --nav-bg:rgba(10,10,15,0.95);--hover-bg:rgba(255,255,255,0.04);--hover-border:rgba(255,255,255,0.15);
+    --media-bg:#0d0d14;--ph-grad:linear-gradient(135deg,#111118,#1a1a28);--skel-hi:#1e1e2a;
+    --accent-text:#a89cff;--body-text:rgba(240,240,248,0.85);--bar-bg:rgba(0,0,0,0.2);
+    --icon-stroke:rgba(255,255,255,0.15);--shadow:0 20px 60px rgba(0,0,0,0.4);
+    --pending:#fbbf24;--approved:#4ade80;--rejected:#ff6584;--err-text:#ff8fa8;--ok-text:#6ee79a}
+  [data-theme="light"]{--bg:#f6f6fb;--surface:#f1f1f8;--card:#ffffff;--border:rgba(20,20,45,0.1);--text:#16162a;--muted:#5f5f7d;
+    color-scheme:light;
+    --nav-bg:rgba(246,246,251,0.92);--hover-bg:rgba(20,20,45,0.04);--hover-border:rgba(20,20,45,0.25);
+    --media-bg:#e9e9f2;--ph-grad:linear-gradient(135deg,#ececf5,#dcdcea);--skel-hi:#ececf5;
+    --accent-text:#5648e0;--body-text:rgba(22,22,42,0.85);--bar-bg:rgba(20,20,45,0.03);
+    --icon-stroke:rgba(20,20,45,0.25);--shadow:0 16px 40px rgba(40,40,90,0.15);
+    --pending:#b45309;--approved:#15803d;--rejected:#e11d48;--err-text:#be123c;--ok-text:#15803d}
+  [data-theme="light"] body::before{opacity:.5}
+  .ph-icon{stroke:var(--icon-stroke)}
+  .theme-toggle{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;flex-shrink:0;padding:0}
+  .theme-toggle:hover{color:var(--text);border-color:var(--hover-border);background:var(--hover-bg)}
+  .theme-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .theme-toggle .i-moon{display:none}
+  [data-theme="light"] .theme-toggle .i-sun{display:none}
+  [data-theme="light"] .theme-toggle .i-moon{display:block}
+  .nav-right{display:flex;align-items:center;gap:16px}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;min-height:100vh;display:flex;flex-direction:column}
   body::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(108,99,255,0.12) 0%,transparent 70%);pointer-events:none;z-index:0}
@@ -21,7 +43,7 @@
   .auth-title{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;margin-bottom:6px}
   .auth-sub{color:var(--muted);font-size:14px;margin-bottom:32px}
   .submit-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-  .user-chip{display:flex;align-items:center;gap:8px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);padding:6px 12px;border-radius:100px;font-size:13px;color:#a89cff}
+  .user-chip{display:flex;align-items:center;gap:8px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);padding:6px 12px;border-radius:100px;font-size:13px;color:var(--accent-text)}
   .avatar-sm{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff}
   .form-group{margin-bottom:18px}
   label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:8px}
@@ -41,8 +63,8 @@
   .toggle-link a{color:var(--accent);text-decoration:none;font-weight:500}
   .alert{padding:12px 16px;border-radius:10px;font-size:14px;margin-bottom:20px;display:none}
   .alert.show{display:block}
-  .alert-error{background:rgba(255,101,132,0.1);border:1px solid rgba(255,101,132,0.2);color:#ff8fa8}
-  .alert-success{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:#6ee79a}
+  .alert-error{background:rgba(255,101,132,0.1);border:1px solid rgba(255,101,132,0.2);color:var(--err-text)}
+  .alert-success{background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:var(--ok-text)}
   .my-projects{margin-top:32px;padding-top:32px;border-top:1px solid var(--border)}
   .section-label{font-size:12px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
   .project-row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
@@ -50,13 +72,13 @@
   .project-row-title{font-weight:500;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .project-row-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .status-badge{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;text-transform:capitalize}
-  .status-pending{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.2)}
-  .status-approved{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.2)}
-  .status-rejected{background:rgba(255,101,132,0.1);color:#ff6584;border:1px solid rgba(255,101,132,0.2)}
-  .edit-btn{font-size:12px;font-weight:500;padding:4px 12px;border-radius:6px;border:1px solid rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:#a89cff;cursor:pointer;transition:all 0.2s}
+  .status-pending{background:rgba(251,191,36,0.1);color:var(--pending);border:1px solid rgba(251,191,36,0.2)}
+  .status-approved{background:rgba(74,222,128,0.1);color:var(--approved);border:1px solid rgba(74,222,128,0.2)}
+  .status-rejected{background:rgba(255,101,132,0.1);color:var(--rejected);border:1px solid rgba(255,101,132,0.2)}
+  .edit-btn{font-size:12px;font-weight:500;padding:4px 12px;border-radius:6px;border:1px solid rgba(108,99,255,0.3);background:rgba(108,99,255,0.08);color:var(--accent-text);cursor:pointer;transition:all 0.2s}
   .edit-btn:hover{background:rgba(108,99,255,0.2);border-color:var(--accent)}
   .feedback-note{font-size:12px;color:var(--muted);margin-top:6px;font-style:italic}
-  .edit-notice{background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:#a89cff;margin-bottom:20px;display:none;align-items:center;gap:10px}
+  .edit-notice{background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.2);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--accent-text);margin-bottom:20px;display:none;align-items:center;gap:10px}
   .edit-notice.show{display:flex}
   @media(max-width:500px){.auth-box,.submit-box{padding:28px 22px}.form-row{grid-template-columns:1fr}nav{padding:16px 20px}}
 </style>
@@ -64,7 +86,13 @@
 <body>
 <nav>
   <a href="index.html" class="nav-logo">◈ Showcase</a>
-  <a href="index.html" class="nav-back">← Back to projects</a>
+  <div class="nav-right">
+    <a href="index.html" class="nav-back">← Back to projects</a>
+    <button type="button" class="theme-toggle" onclick="toggleTheme()" aria-label="Switch between dark and light mode" title="Switch theme">
+    <svg class="i-sun" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+    <svg class="i-moon" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+  </button>
+  </div>
 </nav>
 
 <div class="page" id="auth-view">
@@ -413,6 +441,13 @@
     }
   }
   init();
+
+  // ── light / dark toggle (dark by default, choice is not remembered) ──
+  function toggleTheme(){
+    const r=document.documentElement;
+    if(r.getAttribute('data-theme')==='light')r.removeAttribute('data-theme');
+    else r.setAttribute('data-theme','light');
+  }
 </script>
 </body>
 </html>
