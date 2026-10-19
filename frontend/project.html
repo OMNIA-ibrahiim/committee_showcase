@@ -53,6 +53,7 @@
   .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
   .creator-info{}
   .creator-name{font-size:14px;font-weight:500;color:var(--text)}
+  .cat-pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;color:var(--accent-text);background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2)}
   .project-date{font-size:12px;color:var(--muted)}
   .project-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px}
   .project-links{display:flex;gap:10px;flex-wrap:wrap}
@@ -147,6 +148,9 @@
   }
 
 
+const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projects'},{value:'backend',label:'Backend',section:'Backend projects'}]; // add a line here to add a category
+  const catLabel=v=>{const c=CATEGORIES.find(x=>x.value===v);return c?c.label:''};
+
   function initials(name){return name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)}
   function formatDate(iso){return new Date(iso).toLocaleDateString('en-US',{day:'numeric',month:'long',year:'numeric'})}
 
@@ -192,6 +196,7 @@
               <div class="project-date">${formatDate(p.submitted_at)}</div>
             </div>
           </div>
+          ${catLabel(p.category)?`<span class="cat-pill">${catLabel(p.category)}</span>`:''}
         </div>
 
         <div class="project-title">${p.title}</div>

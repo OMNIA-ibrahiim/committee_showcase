@@ -52,6 +52,7 @@
   .stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em}
   main{max-width:1200px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1}
   .section-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:28px}
+  .cat-section{margin-bottom:56px}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:24px}
   .card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform 0.25s,border-color 0.25s,box-shadow 0.25s;display:flex;flex-direction:column;animation:fadeUp 0.5s ease both;cursor:pointer}
   .card:hover{transform:translateY(-4px);border-color:rgba(108,99,255,0.3);box-shadow:var(--shadow),0 0 0 1px rgba(108,99,255,0.1)}
@@ -115,15 +116,15 @@
 
 <div class="stats-bar">
   <div class="stat"><div class="stat-number" id="stat-count">—</div><div class="stat-label">Projects</div></div>
-  <div class="stat"><div class="stat-number" id="stat-members">—</div><div class="stat-label">Members</div></div>
 </div>
 
 <main>
-  <div class="section-title">All Projects</div>
+  <div id="sections">
   <div class="grid" id="grid">
     <div class="skeleton-card"><div class="skeleton skeleton-media"></div><div class="skeleton-body"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:80%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div></div>
     <div class="skeleton-card"><div class="skeleton skeleton-media"></div><div class="skeleton-body"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:80%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div></div>
     <div class="skeleton-card"><div class="skeleton skeleton-media"></div><div class="skeleton-body"><div class="skeleton skeleton-line" style="width:40%"></div><div class="skeleton skeleton-line" style="width:80%"></div><div class="skeleton skeleton-line" style="width:65%"></div></div></div>
+  </div>
   </div>
 </main>
 
@@ -275,6 +276,8 @@
     }
   }
 
+const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projects'},{value:'backend',label:'Backend',section:'Backend projects'}]; // add a line here to add a category
+
   async function loadProjects(){
     try{
       const token = getToken();
@@ -283,17 +286,20 @@
       });
       const data=await res.json();
       const projects=(data.projects||[]).map(cleanProject);
-      const grid=document.getElementById('grid');
+      const box=document.getElementById('sections');
 
       if(!projects.length){
-        grid.innerHTML=`<div class="empty"><p>No projects yet. Be the first to submit one.</p></div>`;
+        box.innerHTML=`<div class="grid"><div class="empty"><p>No projects yet. Be the first to submit one.</p></div></div>`;
       }else{
-        grid.innerHTML=projects.map(renderCard).join('');
+        box.innerHTML=CATEGORIES.map(c=>{
+          const list=projects.filter(p=>p.category===c.value);
+          if(!list.length)return '';
+          return `<section class="cat-section"><div class="section-title">${c.section}</div><div class="grid">${list.map(renderCard).join('')}</div></section>`;
+        }).join('');
       }
       document.getElementById('stat-count').textContent=projects.length;
-      document.getElementById('stat-members').textContent=new Set(projects.map(p=>p.creator_name)).size;
     }catch(err){
-      document.getElementById('grid').innerHTML=`<div class="empty"><p>Could not load projects. Make sure the server is running.</p></div>`;
+      document.getElementById('sections').innerHTML=`<div class="grid"><div class="empty"><p>Could not load projects. Make sure the server is running.</p></div></div>`;
     }
   }
 

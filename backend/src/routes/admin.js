@@ -23,7 +23,7 @@ router.get('/projects', async (req, res) => {
     let where = '';
     if (status && valid.includes(status)) { where = 'WHERE p.status = $1'; params.push(status); }
     const result = await pool.query(
-      `SELECT p.id, p.title, p.description, p.creator_name, p.repo_url, p.demo_url,
+      `SELECT p.id, p.title, p.description, p.creator_name, p.category, p.repo_url, p.demo_url,
          p.video_url, p.postman_url, p.image_urls, p.status, p.admin_feedback,
          p.submitted_at, p.reviewed_at,
          u.name AS submitted_by_name, u.email AS submitted_by_email,

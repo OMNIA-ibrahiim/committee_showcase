@@ -1,5 +1,8 @@
 const { z } = require('zod');
 
+// To add a category later, add ONE value here (and one line in the frontend lists).
+const CATEGORIES = ['fullstack', 'backend'];
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function checkId(req, res, next, id) {
@@ -20,6 +23,7 @@ const projectSchema = z.object({
   title:        z.string().trim().min(1, 'is required').max(200),
   description:  z.string().trim().min(1, 'is required').max(5000),
   creator_name: z.string().trim().min(1, 'is required').max(100),
+  category:     z.enum(CATEGORIES, { errorMap: () => ({ message: 'is required (choose a project type)' }) }),
   repo_url:     optUrl,
   demo_url:     optUrl,
   video_url:    optUrl,
@@ -33,4 +37,4 @@ function firstError(err) {
   return i.path.length ? `${i.path.join('.')}: ${i.message}` : i.message;
 }
 
-module.exports = { checkId, projectSchema, firstError };
+module.exports = { checkId, projectSchema, firstError, CATEGORIES };

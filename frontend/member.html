@@ -47,8 +47,8 @@
   .avatar-sm{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff}
   .form-group{margin-bottom:18px}
   label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:8px}
-  input,textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s}
-  input:focus,textarea:focus{border-color:rgba(108,99,255,0.5);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
+  input,textarea,select{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text);outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+  input:focus,textarea:focus,select:focus{border-color:rgba(108,99,255,0.5);box-shadow:0 0 0 3px rgba(108,99,255,0.1)}
   input::placeholder,textarea::placeholder{color:var(--muted);opacity:0.5}
   textarea{resize:vertical;min-height:100px}
   .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -172,6 +172,10 @@
         <label>Description *</label>
         <textarea id="s-desc" placeholder="What does your project do? What tech did you use?" required></textarea>
       </div>
+      <div class="form-group">
+        <label>Project type *</label>
+        <select id="s-category" required></select>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label>GitHub repo URL</label>
@@ -243,6 +247,9 @@
     }catch(e){return res}
   }
 
+const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projects'},{value:'backend',label:'Backend',section:'Backend projects'}]; // add a line here to add a category
+  document.getElementById('s-category').innerHTML='<option value="">Choose a type…</option>'+CATEGORIES.map(c=>`<option value="${c.value}">${c.label}</option>`).join('');
+
   let isSignup  = false;
   let editingId = null;
 
@@ -307,6 +314,7 @@
       title:       document.getElementById('s-title').value.trim(),
       creator_name:document.getElementById('s-creator').value.trim(),
       description: document.getElementById('s-desc').value.trim(),
+      category:    document.getElementById('s-category').value,
       repo_url:    document.getElementById('s-repo').value.trim()||null,
       demo_url:    document.getElementById('s-demo').value.trim()||null,
       video_url:   document.getElementById('s-video').value.trim()||null,
@@ -377,6 +385,7 @@
     document.getElementById('s-title').value  =p.title||'';
     document.getElementById('s-creator').value=p.creator_name||'';
     document.getElementById('s-desc').value   =p.description||'';
+    document.getElementById('s-category').value=p.category||'';
     document.getElementById('s-repo').value   =p.repo_url||'';
     document.getElementById('s-demo').value   =p.demo_url||'';
     document.getElementById('s-video').value  =p.video_url||'';

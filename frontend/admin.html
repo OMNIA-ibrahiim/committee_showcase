@@ -225,6 +225,8 @@
     flex-wrap: wrap;
   }
 
+  .cat-pill { font-size: 11px; padding: 2px 9px; border-radius: 100px; color: var(--accent-text); background: rgba(108,99,255,0.1); border: 1px solid rgba(108,99,255,0.2); }
+
   .project-desc {
     font-size: 14px;
     color: var(--muted);
@@ -476,6 +478,9 @@
     }catch(e){return res}
   }
 
+const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projects'},{value:'backend',label:'Backend',section:'Backend projects'}]; // add a line here to add a category
+  const catLabel = v => { const c = CATEGORIES.find(x => x.value === v); return c ? c.label : esc(v || ''); };
+
   let allProjects = [];
   let currentFilter = 'all';
   let adminToken = null;
@@ -611,6 +616,7 @@
             <span class="status-badge status-${p.status}">${p.status}</span>
           </div>
           <div class="project-meta">
+            <span class="cat-pill">${catLabel(p.category)}</span>
             <span>by ${p.creator_name}</span>
             <span>·</span>
             <span>${p.submitted_by_name} (${p.submitted_by_email})</span>

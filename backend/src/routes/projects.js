@@ -12,7 +12,7 @@ router.get('/', optionalAuth, async (req, res) => {
   const userId = req.user ? req.user.id : null;
   try {
     const result = await pool.query(
-      `SELECT p.id, p.title, p.description, p.creator_name,
+      `SELECT p.id, p.title, p.description, p.creator_name, p.category,
          p.repo_url, p.demo_url, p.video_url, p.image_urls,
          p.submitted_at, p.postman_url, u.name AS submitted_by_name,
          COUNT(l.user_id)::int AS likes,
@@ -37,7 +37,7 @@ router.get('/', optionalAuth, async (req, res) => {
 router.get('/mine', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, title, description, creator_name, repo_url, demo_url, video_url,
+      `SELECT id, title, description, creator_name, category, repo_url, demo_url, video_url,
          postman_url, image_urls, status, admin_feedback, submitted_at, reviewed_at
        FROM projects WHERE submitted_by = $1 ORDER BY submitted_at DESC`,
       [req.user.id]
@@ -53,7 +53,7 @@ router.get('/mine', requireAuth, async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT p.id, p.title, p.description, p.creator_name,
+      `SELECT p.id, p.title, p.description, p.creator_name, p.category,
          p.repo_url, p.demo_url, p.video_url, p.image_urls, p.postman_url,
          p.submitted_at, u.name AS submitted_by_name,
          COUNT(l.user_id)::int AS likes
@@ -80,11 +80,11 @@ router.post('/', requireAuth, async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO projects
-         (submitted_by, title, description, creator_name, repo_url, demo_url, video_url, image_urls, postman_url)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+         (submitted_by, title, description, creator_name, repo_url, demo_url, video_url, image_urls, postman_url, category)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        RETURNING id, title, status, submitted_at`,
       [req.user.id, d.title, d.description, d.creator_name, d.repo_url, d.demo_url,
-       d.video_url, d.image_urls, d.postman_url]
+       d.video_url, d.image_urls, d.postman_url, d.category]
     );
     res.status(201).json({
       message: 'Project submitted successfully. It will be visible after admin review.',
@@ -105,14 +105,14 @@ router.put('/:id', requireAuth, async (req, res) => {
     const result = await pool.query(
       `UPDATE projects SET
          title=$1, description=$2, creator_name=$3, repo_url=$4, demo_url=$5,
-         video_url=$6, image_urls=$7, postman_url=$8,
+         video_url=$6, image_urls=$7, postman_url=$8, category=$11,
          status = CASE WHEN status IN ('approved','rejected')
                        THEN 'pending'::project_status ELSE status END,
          reviewed_at=NULL, reviewed_by=NULL, admin_feedback=NULL
        WHERE id=$9 AND submitted_by=$10
        RETURNING id, title, status, submitted_at`,
       [d.title, d.description, d.creator_name, d.repo_url, d.demo_url,
-       d.video_url, d.image_urls, d.postman_url, req.params.id, req.user.id]
+       d.video_url, d.image_urls, d.postman_url, req.params.id, req.user.id, d.category]
     );
     if (!result.rows.length)
       return res.status(404).json({ error: 'Project not found or you do not own it.' });
