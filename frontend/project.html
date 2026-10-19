@@ -3,24 +3,27 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<script>try{if(localStorage.getItem("theme")==="light")document.documentElement.setAttribute("data-theme","light")}catch(e){}</script>
 <title>Project — Committee Showcase</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
 <style>
-  :root{--bg:#0a0a0f;--surface:#111118;--card:#16161f;--border:rgba(255,255,255,0.07);--accent:#6c63ff;--accent2:#ff6584;--text:#f0f0f8;--muted:#7a7a9a;
+  :root{--bg:#100c09;--surface:#18120e;--card:#1d1612;--border:rgba(255,230,210,0.08);--accent:#ff8a3d;--accent2:#ffc766;--text:#f7efe6;--muted:#a39283;
     color-scheme:dark;
-    --nav-bg:rgba(10,10,15,0.95);--hover-bg:rgba(255,255,255,0.04);--hover-border:rgba(255,255,255,0.15);
-    --media-bg:#0d0d14;--ph-grad:linear-gradient(135deg,#111118,#1a1a28);--skel-hi:#1e1e2a;
-    --accent-text:#a89cff;--body-text:rgba(240,240,248,0.85);--bar-bg:rgba(0,0,0,0.2);
-    --icon-stroke:rgba(255,255,255,0.15);--shadow:0 20px 60px rgba(0,0,0,0.4);
-    --pending:#fbbf24;--approved:#4ade80;--rejected:#ff6584;--err-text:#ff8fa8;--ok-text:#6ee79a}
-  [data-theme="light"]{--bg:#f6f6fb;--surface:#f1f1f8;--card:#ffffff;--border:rgba(20,20,45,0.1);--text:#16162a;--muted:#5f5f7d;
-    color-scheme:light;
-    --nav-bg:rgba(246,246,251,0.92);--hover-bg:rgba(20,20,45,0.04);--hover-border:rgba(20,20,45,0.25);
-    --media-bg:#e9e9f2;--ph-grad:linear-gradient(135deg,#ececf5,#dcdcea);--skel-hi:#ececf5;
-    --accent-text:#5648e0;--body-text:rgba(22,22,42,0.85);--bar-bg:rgba(20,20,45,0.03);
-    --icon-stroke:rgba(20,20,45,0.25);--shadow:0 16px 40px rgba(40,40,90,0.15);
-    --pending:#b45309;--approved:#15803d;--rejected:#e11d48;--err-text:#be123c;--ok-text:#15803d}
+    --accent-rgb:255,138,61;--accent-hover:#ff9d5c;--on-accent:#24120a;--accent-text:#ffa563;
+    --nav-bg:rgba(16,12,9,0.92);--hover-bg:rgba(255,230,210,0.05);--hover-border:rgba(255,230,210,0.18);
+    --media-bg:#150f0b;--ph-grad:linear-gradient(135deg,#18120e,#241a14);--skel-hi:#2a201a;
+    --body-text:rgba(247,239,230,0.86);--bar-bg:rgba(0,0,0,0.22);
+    --icon-stroke:rgba(255,230,210,0.18);--shadow:0 20px 60px rgba(0,0,0,0.45);
+    --pending:#fbbf24;--approved:#4ade80;--rejected:#ff6b6b;--err-text:#ff9a9a;--ok-text:#6ee79a}
+  [data-theme="light"]{--bg:#fbf6f0;--surface:#f6eee5;--card:#fffdfb;--border:rgba(70,40,15,0.12);--text:#2b1d12;--muted:#7b6755;
+    --accent:#dc5a0c;--accent2:#f5a524;color-scheme:light;
+    --accent-rgb:220,90,12;--accent-hover:#c44e08;--on-accent:#ffffff;--accent-text:#b4470a;
+    --nav-bg:rgba(251,246,240,0.92);--hover-bg:rgba(70,40,15,0.05);--hover-border:rgba(70,40,15,0.28);
+    --media-bg:#f0e6da;--ph-grad:linear-gradient(135deg,#f3e9dd,#e8dac9);--skel-hi:#f3e9dd;
+    --body-text:rgba(43,29,18,0.86);--bar-bg:rgba(70,40,15,0.035);
+    --icon-stroke:rgba(70,40,15,0.28);--shadow:0 16px 40px rgba(120,70,20,0.16);
+    --pending:#b45309;--approved:#15803d;--rejected:#dc2626;--err-text:#b91c1c;--ok-text:#15803d}
   [data-theme="light"] body::before{opacity:.5}
   .ph-icon{stroke:var(--icon-stroke)}
   .theme-toggle{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:color 0.2s,border-color 0.2s,background 0.2s;flex-shrink:0;padding:0}
@@ -50,15 +53,15 @@
   .project-header{margin-bottom:32px}
   .project-meta-top{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
   .creator-pill{display:flex;align-items:center;gap:8px}
-  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--on-accent);flex-shrink:0}
   .creator-info{}
   .creator-name{font-size:14px;font-weight:500;color:var(--text)}
-  .cat-pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;color:var(--accent-text);background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2)}
+  .cat-pill{font-size:11px;font-weight:500;padding:4px 10px;border-radius:100px;color:var(--accent-text);background:rgba(var(--accent-rgb),0.1);border:1px solid rgba(var(--accent-rgb),0.2)}
   .project-date{font-size:12px;color:var(--muted)}
   .project-title{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;line-height:1.1;letter-spacing:-0.02em;margin-bottom:20px}
   .project-links{display:flex;gap:10px;flex-wrap:wrap}
-  .link-btn{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;padding:8px 18px;border:1px solid rgba(108,99,255,0.3);border-radius:8px;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
-  .link-btn:hover{background:rgba(108,99,255,0.1);border-color:var(--accent)}
+  .link-btn{font-size:13px;font-weight:500;color:var(--accent);text-decoration:none;padding:8px 18px;border:1px solid rgba(var(--accent-rgb),0.3);border-radius:8px;transition:all 0.2s;display:inline-flex;align-items:center;gap:6px}
+  .link-btn:hover{background:rgba(var(--accent-rgb),0.1);border-color:var(--accent)}
   .link-btn.secondary{color:var(--muted);border-color:var(--border)}
   .link-btn.secondary:hover{color:var(--text);border-color:var(--hover-border);background:var(--hover-bg)}
 
@@ -256,8 +259,9 @@ const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projec
   // ── light / dark toggle (dark by default, choice is not remembered) ──
   function toggleTheme(){
     const r=document.documentElement;
-    if(r.getAttribute('data-theme')==='light')r.removeAttribute('data-theme');
-    else r.setAttribute('data-theme','light');
+    const light=r.getAttribute('data-theme')!=='light';
+    if(light)r.setAttribute('data-theme','light');else r.removeAttribute('data-theme');
+    try{localStorage.setItem('theme',light?'light':'dark')}catch(e){}
   }
 </script>
 </body>
