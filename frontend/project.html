@@ -163,33 +163,28 @@ const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projec
     return m?`https://www.youtube.com/embed/${m[1]}`:null;
   }
 
-  function renderMedia(p){
+  function renderVideo(p){
     const embed=youtubeEmbed(p.video_url);
     if(embed) return `<div class="hero-media"><iframe src="${embed}" allowfullscreen loading="lazy"></iframe></div>`;
     if(p.video_url) return `<div class="hero-media"><video src="${p.video_url}" controls preload="metadata"></video></div>`;
-    if(p.image_urls&&p.image_urls.length) return `<div class="hero-media"><img src="${p.image_urls[0]}" alt="${p.title}"/></div>`;
-    return `<div class="hero-media"><div class="hero-media-placeholder"><svg class="ph-icon" width="48" height="48" fill="none" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>`;
+    return '';
   }
 
-  function renderGallery(images,hasVideo){
-    // if there's a video, show all images; if no video, skip first image (used as hero)
-    const imgs = hasVideo ? images : images.slice(1);
-    if(!imgs||!imgs.length) return '';
-    const cls = imgs.length===1?'one':imgs.length===2?'two':'three';
+  function renderGallery(images){
+    if(!images.length) return '';
+    const cls = images.length===1?'one':images.length===2?'two':'three';
     return `<div class="gallery ${cls}">
-      ${imgs.map(url=>`<div class="gallery-img" data-src="${url}" onclick="openLightbox(this.dataset.src)"><img src="${url}" loading="lazy"/></div>`).join('')}
+      ${images.map(url=>`<div class="gallery-img" data-src="${url}" onclick="openLightbox(this.dataset.src)"><img src="${url}" loading="lazy"/></div>`).join('')}
     </div>`;
   }
 
   function render(p){
-    const hasVideo = !!(p.video_url);
-    const extraImages = renderGallery(p.image_urls||[], hasVideo);
+    const images = renderGallery(p.image_urls||[]);
+    const video = renderVideo(p);
 
     document.title = `${p._rawTitle} — Committee Showcase`;
 
     document.getElementById('page').innerHTML = `
-      ${renderMedia(p)}
-
       <div class="project-header">
         <div class="project-meta-top">
           <div class="creator-pill">
@@ -211,12 +206,14 @@ const CATEGORIES=[{value:'fullstack',label:'Fullstack',section:'Fullstack projec
           ${p.postman_url ? `<a href="${p.postman_url}" target="_blank" rel="noopener noreferrer" class="link-btn" style="color:#ff6c37;border-color:rgba(255,108,55,0.3)">↗ Postman</a>` : ''}
         </div>
 
-      <hr class="divider"/>
+        <hr class="divider"/>
 
-      <div class="section-label">About this project</div>
-      <div class="description">${p.description}</div>
+        <div class="section-label">About this project</div>
+        <div class="description">${p.description}</div>
+      </div>
 
-      ${extraImages ? `<hr class="divider"/><div class="section-label">Photos</div>${extraImages}` : ''}
+      ${images ? `<hr class="divider"/><div class="section-label">Photos</div>${images}` : ''}
+      ${video ? `<hr class="divider"/><div class="section-label">Video</div>${video}` : ''}
     `;
   }
 

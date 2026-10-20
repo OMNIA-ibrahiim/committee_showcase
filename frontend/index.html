@@ -190,10 +190,10 @@
   function youtubeEmbed(url){if(!url)return null;const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);return m?`https://www.youtube.com/embed/${m[1]}`:null}
 
   function renderMedia(p){
+    if(p.image_urls&&p.image_urls.length) return `<div class="card-media"><img src="${p.image_urls[0]}" alt="${p.title}" loading="lazy"/></div>`;
     const embed=youtubeEmbed(p.video_url);
     if(embed) return `<div class="card-media"><iframe src="${embed}" loading="lazy"></iframe></div>`;
     if(p.video_url) return `<div class="card-media"><video src="${p.video_url}" preload="metadata"></video></div>`;
-    if(p.image_urls&&p.image_urls.length) return `<div class="card-media"><img src="${p.image_urls[0]}" alt="${p.title}" loading="lazy"/></div>`;
     return `<div class="card-media"><div class="media-placeholder"><svg class="ph-icon" width="48" height="48" fill="none" stroke-width="1" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div>`;
   }
 
